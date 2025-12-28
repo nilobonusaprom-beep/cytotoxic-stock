@@ -3,74 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ใบเบิกยาเคมีบำบัด - รพ.สกลนคร</title>
+    <title>Stock Cytotoxic - Sakon Nakhon Hospital</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Sarabun', sans-serif; font-size: 13px; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
+        
+        /* CSS สำหรับการพิมพ์ (จะทำงานเมื่อกดพิมพ์เท่านั้น) */
         @media print {
             @page { size: A4 portrait; margin: 8mm; }
             .no-print { display: none !important; }
-            body { background: white; padding: 0; margin: 0; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { padding: 2px 4px !important; border: 1px solid #000 !important; font-size: 11px; }
-            .order-bold { font-size: 15px !important; font-weight: 900 !important; color: black !important; }
-            .exp-highlight { background-color: #fff7ed !important; -webkit-print-color-adjust: exact; }
+            .print-only { display: block !important; }
+            body { background: white; padding: 0 !important; }
+            .main-container { max-width: 100% !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
+            
+            table { width: 100%; border-collapse: collapse !important; margin-top: 5px; }
+            th, td { border: 1px solid black !important; padding: 2px 4px !important; font-size: 10px !important; line-height: 1.1; }
+            th { background-color: #f3f3f3 !important; -webkit-print-color-adjust: exact; }
+            
+            /* เน้นจำนวนเบิกให้เด่นมากตอนพิมพ์ */
+            .order-cell { font-size: 13px !important; font-weight: 800 !important; text-align: center; background-color: #eeeeee !important; -webkit-print-color-adjust: exact; }
+            .header-doc { border-bottom: 2px solid black; margin-bottom: 10px; }
+            .signature-box { margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 10px; text-align: center; }
         }
-        .exp-highlight { background-color: #fff7ed; }
-        .highlight-column { background-color: #eff6ff; border-left: 2px solid #1e40af; border-right: 2px solid #1e40af; }
+
+        .print-only { display: none; }
+        .exp-badge { font-size: 9px; padding: 1px 4px; background: #fee2e2; color: #ef4444; border-radius: 4px; font-weight: bold; }
+        .input-stock:focus { border-color: #3b82f6; ring: 2px; ring-color: #bfdbfe; }
     </style>
 </head>
-<body class="bg-gray-100 p-2">
+<body class="p-2 md:p-6">
 
-    <div class="max-w-4xl mx-auto bg-white shadow-lg p-4 rounded-lg">
-        <header class="flex justify-between items-start border-b-2 border-blue-900 pb-2 mb-2">
-            <div>
-                <h1 class="text-lg font-bold text-blue-900">ใบตรวจนับและเบิกยาเคมีบำบัด</h1>
-                <p class="text-[11px]">กลุ่มงานเภสัชกรรม โรงพยาบาลสกลนคร</p>
+    <div class="max-w-4xl mx-auto main-container bg-white shadow-xl rounded-2xl overflow-hidden">
+        
+        <div class="no-print bg-[#1e3a8a] text-white p-6 shadow-lg">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-xl font-bold flex items-center gap-2">💊 ระบบคำนวณยอดเบิกยาเคมีบำบัด</h1>
+                    <p class="text-blue-200 text-xs">กลุ่มงานเภสัชกรรม โรงพยาบาลสกลนคร</p>
+                </div>
+                <button onclick="window.print()" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-xl font-bold shadow-md transition-all active:scale-95 text-sm flex items-center gap-2">
+                    <span>🖨️ พิมพ์ใบเบิกยา</span>
+                </button>
             </div>
-            <div class="no-print">
-                <button onclick="window.print()" class="bg-blue-600 text-white px-3 py-1 rounded text-sm font-bold">🖨️ พิมพ์ (A4)</button>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="bg-white/10 p-3 rounded-xl border border-white/20">
+                    <label class="block text-[10px] text-blue-200 uppercase font-bold mb-1">วันที่ตรวจสอบ</label>
+                    <span id="dateNow" class="font-semibold text-sm"></span>
+                </div>
+                <div class="bg-white/10 p-3 rounded-xl border border-white/20">
+                    <label class="block text-[10px] text-blue-200 uppercase font-bold mb-1">ผู้ตรวจสอบ (เจ้าพนักงาน)</label>
+                    <input type="text" id="checkerName" value="เกศสุดา" class="bg-transparent border-none outline-none w-full font-semibold text-sm placeholder:text-white/40">
+                </div>
+                <div class="bg-white/10 p-3 rounded-xl border border-white/20">
+                    <label class="block text-[10px] text-blue-200 uppercase font-bold mb-1">เภสัชกรควบคุม</label>
+                    <p class="font-semibold text-sm">ภญ.นิโลบล</p>
+                </div>
             </div>
-        </header>
-
-        <div class="grid grid-cols-3 gap-2 mb-2 text-xs">
-            <div><strong>วันที่:</strong> <span id="displayDate"></span></div>
-            <div><strong>ผู้ตรวจสอบ:</strong> <input type="text" id="checker" value="เกศสุดา" class="border-b outline-none w-24"></div>
-            <div><strong>เภสัชกร:</strong> ภญ.นิโลบล</div>
         </div>
 
-        <table class="w-full border-collapse border border-gray-400">
-            <thead class="bg-gray-200">
-                <tr class="text-[11px]">
-                    <th class="border p-1 w-8">#</th>
-                    <th class="border p-1 text-left">รายการยา</th>
-                    <th class="border p-1 w-16">คงคลัง</th>
-                    <th class="border p-1 w-12">Target</th>
-                    <th class="border p-1 w-24">EXP Date</th>
-                    <th class="border p-1 w-16 highlight-column">ยอดเบิก</th>
-                </tr>
-            </thead>
-            <tbody id="inventoryBody"></tbody>
-        </table>
+        <div class="print-only header-doc text-center p-2">
+            <h2 class="text-lg font-bold">ใบสรุปยอดเบิกยาเคมีบำบัด</h2>
+            <p class="text-[10px]">ผู้ตรวจสอบ: เกศสุดา | วันที่: <span id="datePrint"></span></p>
+        </div>
 
-        <footer class="mt-2 text-[9px] text-gray-400 text-right no-print">
-            System v3.0 (EXP Ready) | <button onclick="location.reload()" class="underline">Reset</button>
-        </footer>
+        <div class="p-2 md:p-4">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-gray-400 text-[10px] font-bold border-b no-print">
+                        <th class="pb-2 w-8">#</th>
+                        <th class="pb-2 text-left">รายการยา</th>
+                        <th class="pb-2 w-12 text-center">Target</th>
+                        <th class="pb-2 w-24 text-center">คงคลังจริง</th>
+                        <th class="pb-2 w-16 text-center text-blue-600">ยอดเบิก</th>
+                    </tr>
+                    <tr class="print-only">
+                        <th>#</th>
+                        <th class="text-left">รายการยา</th>
+                        <th>คงคลัง</th>
+                        <th>Target</th>
+                        <th>ยอดเบิก</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryList">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="print-only signature-box">
+            <div>
+                <p>ลงชื่อ..................................................</p>
+                <p>( เกศสุดา )</p>
+                <p>ผู้ตรวจนับยา</p>
+            </div>
+            <div>
+                <p>ลงชื่อ..................................................</p>
+                <p>( ภญ.นิโลบล )</p>
+                <p>เภสัชกรควบคุม</p>
+            </div>
+        </div>
+        
+        <div class="no-print p-4 text-center">
+            <button onclick="location.reload()" class="text-xs text-gray-400 hover:text-red-500 transition underline">ล้างข้อมูลใหม่</button>
+        </div>
     </div>
 
     <script>
-        const drugData = [
+        const drugs = [
             { id: 1, name: "5-FU 500 mg/10 ml", target: 700 },
-            { id: 2, name: "Actinomycin-D", target: 20, checkExp: true },
-            { id: 3, name: "Asparaginase", target: 20, checkExp: true },
+            { id: 2, name: "Actinomycin-D", target: 20, isExp: true },
+            { id: 3, name: "Asparaginase", target: 20, isExp: true },
             { id: 4, name: "Bleomycin", target: 20 },
             { id: 5, name: "Bortezomib", target: 20 },
             { id: 6, name: "Carboplatin", target: 80 },
             { id: 7, name: "Cisplatin", target: 80 },
             { id: 8, name: "Cyclophosphamide", target: 50 },
-            { id: 9, name: "Cytarabine 100 mg", target: 30, checkExp: true },
-            { id: 10, name: "Cytarabine 2 GM", target: 50, checkExp: true },
+            { id: 9, name: "Cytarabine 100 mg", target: 30, isExp: true },
+            { id: 10, name: "Cytarabine 2 GM", target: 50, isExp: true },
             { id: 11, name: "Dacarbazine 100 mg", target: 20 },
             { id: 12, name: "Dacarbazine 500 mg", target: 10 },
             { id: 13, name: "Docetaxel 20 mg", target: 40 },
@@ -81,7 +131,7 @@
             { id: 18, name: "Gemcitabine 1 GM", target: 60 },
             { id: 19, name: "HERZUMA 440 mg", target: 25 },
             { id: 20, name: "HERZUMA 150 mg", target: 10 },
-            { id: 21, name: "Idarubicin", target: 20, checkExp: true },
+            { id: 21, name: "Idarubicin", target: 20, isExp: true },
             { id: 22, name: "Ifosfamide", target: 70 },
             { id: 23, name: "Irinotecan", target: 60 },
             { id: 24, name: "Leucovorin", target: 120 },
@@ -89,8 +139,8 @@
             { id: 26, name: "Methotrexate 1 GM", target: 50 },
             { id: 27, name: "Methotrexate 50 mg", target: 40 },
             { id: 28, name: "Mitomycin 2 mg", target: 20 },
-            { id: 29, name: "Mitomycin 10 mg", target: 10, checkExp: true },
-            { id: 30, name: "Mitoxantrone", target: 10, checkExp: true },
+            { id: 29, name: "Mitomycin 10 mg", target: 10, isExp: true },
+            { id: 30, name: "Mitoxantrone", target: 10, isExp: true },
             { id: 31, name: "Oxaliplatin", target: 100 },
             { id: 32, name: "Paclitaxel", target: 70 },
             { id: 33, name: "TRUXIMA 100 mg", target: 60 },
@@ -103,36 +153,64 @@
             { id: 40, name: "Cefuroxime", target: 10 }
         ];
 
-        function render() {
-            const body = document.getElementById('inventoryBody');
-            document.getElementById('displayDate').innerText = new Date().toLocaleDateString('th-TH');
-            body.innerHTML = drugData.map(d => `
-                <tr class="${d.checkExp ? 'exp-highlight' : ''}">
-                    <td class="border text-center text-[9px]">${d.id}</td>
-                    <td class="border px-1 font-bold leading-tight">${d.name}</td>
-                    <td class="border p-0">
-                        <input type="number" oninput="calc(${d.id}, ${d.target})" id="s-${d.id}" class="w-full text-center outline-none bg-transparent h-6 font-bold">
+        function init() {
+            const today = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+            document.getElementById('dateNow').innerText = today;
+            document.getElementById('datePrint').innerText = today;
+            
+            const container = document.getElementById('inventoryList');
+            container.innerHTML = drugs.map(d => `
+                <tr class="border-b border-gray-100 hover:bg-blue-50/50 transition-colors">
+                    <td class="py-3 text-center text-[10px] text-gray-400 font-mono no-print">${d.id}</td>
+                    <td class="print-only text-center">${d.id}</td>
+                    <td class="py-3">
+                        <div class="font-bold text-gray-700 leading-tight">
+                            ${d.name}
+                            ${d.isExp ? '<span class="no-print ml-2 exp-badge italic animate-pulse">CHECK EXP</span>' : ''}
+                        </div>
                     </td>
-                    <td class="border text-center text-gray-500">${d.target}</td>
-                    <td class="border p-0 text-center">
-                        ${d.checkExp ? `<input type="date" class="text-[9px] w-full bg-transparent outline-none">` : '-'}
+                    <td class="py-3 text-center no-print">
+                        <span class="px-2 py-1 bg-gray-100 rounded-lg text-gray-500 font-bold">${d.target}</span>
                     </td>
-                    <td class="border p-0 text-center highlight-column">
-                        <span id="o-${d.id}" class="order-bold text-blue-800">0</span>
+                    <td class="py-3 no-print">
+                        <div class="flex items-center justify-center gap-2">
+                            ${d.isExp ? '<input type="date" class="text-[9px] border rounded p-1 w-20 outline-none focus:border-blue-400 bg-gray-50">' : ''}
+                            <input type="number" oninput="calc(${d.id}, ${d.target})" id="stock-${d.id}" 
+                                class="input-stock w-16 text-center border-2 border-blue-100 rounded-lg py-1 font-bold outline-none">
+                        </div>
+                    </td>
+                    <td class="print-only text-center"><span id="p-stock-${d.id}">-</span></td>
+                    <td class="print-only text-center">${d.target}</td>
+                    <td class="py-3 text-center order-cell">
+                        <span id="order-${d.id}" class="font-black text-lg text-gray-300">0</span>
                     </td>
                 </tr>
             `).join('');
         }
 
         function calc(id, target) {
-            const current = parseInt(document.getElementById(`s-${id}`).value) || 0;
-            const diff = target - current;
-            const result = diff > 0 ? diff : 0;
-            const display = document.getElementById(`o-${id}`);
-            display.innerText = result;
-            display.className = result > 0 ? "order-bold text-red-600" : "order-bold text-green-600";
+            const val = parseInt(document.getElementById(`stock-${id}`).value) || 0;
+            const diff = target - val;
+            const res = diff > 0 ? diff : 0;
+            
+            const orderEl = document.getElementById(`order-${id}`);
+            orderEl.innerText = res;
+            
+            // ปรับสีตอนใช้งานให้ดูง่าย
+            if (res > 0) {
+                orderEl.classList.remove('text-gray-300', 'text-green-500');
+                orderEl.classList.add('text-red-500');
+            } else {
+                orderEl.classList.remove('text-gray-300', 'text-red-500');
+                orderEl.classList.add('text-green-500');
+            }
+
+            // ส่งค่าไปที่ตารางพิมพ์
+            const printStock = document.getElementById(`p-stock-${id}`);
+            if (printStock) printStock.innerText = val;
         }
-        render();
+
+        init();
     </script>
 </body>
 </html>
