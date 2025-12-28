@@ -3,114 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OncoStock V11 - Analytics Edition</title>
+    <title>OncoStock V13 - Self Learning</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f1f5f9; }
         @media print {
             @page { size: A4 portrait; margin: 3mm 5mm; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            body { background: white; padding: 0 !important; margin: 0 !important; }
-            .main-container { max-width: 100% !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
+            body { background: white; padding: 0 !important; }
             table { width: 100%; border-collapse: collapse !important; border: 1.2px solid black !important; }
-            th, td { border: 1px solid black !important; padding: 1px 2px !important; font-size: 8.8px !important; line-height: 1; color: black !important; }
-            th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
-            input { border: none !important; pointer-events: none; text-align: center; font-weight: bold; }
-            .order-cell { font-size: 11px !important; font-weight: 900 !important; background-color: #eeeeee !important; -webkit-print-color-adjust: exact; }
-            .signature-box { margin-top: 5px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 8.5px; text-align: center; }
+            th, td { border: 1px solid black !important; padding: 1px 2px !important; font-size: 8.5px !important; line-height: 1.1; }
+            .order-cell { background-color: #f3f4f6 !important; font-weight: 900 !important; text-align: center; }
         }
         .print-only { display: none; }
-        .exp-badge { font-size: 8px; padding: 1px 3px; background: #fee2e2; color: #ef4444; border-radius: 4px; font-weight: bold; }
-        .dashboard-card { background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%); }
+        .scanned-highlight { animation: highlight 1.5s ease; }
+        @keyframes highlight { 0% { background-color: #fef08a; } 100% { background-color: transparent; } }
+        #reader__scan_region { background: white !important; }
     </style>
 </head>
 <body class="p-1 md:p-6">
-    <div class="max-w-4xl mx-auto main-container bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+    <div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden">
         
-        <div class="no-print dashboard-card text-white p-5 shadow-lg">
+        <div class="no-print bg-[#1e293b] text-white p-5">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <div>
-                    <h1 class="text-xl font-bold flex items-center gap-2">💊 OncoStock Smart V11</h1>
-                    <p class="text-indigo-300 text-xs italic">Analytics & Requisition Dashboard</p>
+                    <h1 class="text-xl font-bold flex items-center gap-2">💊 OncoStock Smart V13</h1>
+                    <p class="text-slate-400 text-[10px] italic uppercase tracking-widest">Self-Learning Barcode Engine</p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="sendToLine()" class="bg-[#06c755] hover:bg-[#05b34c] px-4 py-2 rounded-xl font-bold shadow-md active:scale-95 transition-all text-sm flex items-center gap-2">📲 ส่ง Line</button>
-                    <button onclick="window.print()" class="bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-xl font-bold shadow-md active:scale-95 transition-all text-sm italic">🖨️ พิมพ์</button>
+                    <button id="scanBtn" onclick="toggleScanner()" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl font-bold shadow-lg transition-all text-sm">
+                        📷 <span id="btnText">เปิดกล้องสแกนยา</span>
+                    </button>
+                    <button onclick="sendToLine()" class="bg-[#06c755] px-4 py-2 rounded-xl font-bold text-sm shadow-lg">📲 ส่ง Line</button>
+                    <button onclick="window.print()" class="bg-slate-700 px-3 py-2 rounded-xl text-sm italic">🖨️</button>
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div class="bg-white/10 p-2 rounded-lg border border-white/10"><label class="block text-[10px] opacity-60 font-bold mb-1 uppercase">วันที่</label><span id="dateNow" class="font-semibold text-sm"></span></div>
-                <div class="bg-white/10 p-2 rounded-lg border border-white/10"><label class="block text-[10px] opacity-60 font-bold mb-1 uppercase">ผู้ตรวจ</label><input type="text" id="checkerName" value="เกศสุดา" oninput="saveChecker()" class="bg-transparent border-none outline-none w-full font-semibold text-sm"></div>
-                <div class="bg-white/10 p-2 rounded-lg border border-white/10"><label class="block text-[10px] opacity-60 font-bold mb-1 uppercase">เภสัชกร</label><p class="font-semibold text-sm uppercase">ภญ.นิโลบล</p></div>
+            <div id="scanner-wrapper" class="hidden mb-4 rounded-2xl overflow-hidden border-2 border-indigo-500 shadow-inner">
+                <div id="reader" style="width: 100%;"></div>
             </div>
-        </div>
 
-        <div class="no-print bg-gray-50 p-4 border-b grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-                <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase flex items-center gap-1">📈 Top 5 Usage (เดือนนี้)</h3>
-                <div id="topUsage" class="text-xs space-y-1">
-                    <p class="text-gray-400 italic">ยังไม่มีข้อมูลการเบิก...</p>
-                </div>
+            <div class="grid grid-cols-2 gap-2 text-[10px] opacity-80">
+                <div class="bg-white/5 p-2 rounded-lg border border-white/10">📅 <span id="dateNow"></span></div>
+                <div class="bg-white/5 p-2 rounded-lg border border-white/10">👤 <input type="text" id="checkerName" value="เกศสุดา" oninput="saveChecker()" class="bg-transparent border-none outline-none w-20 font-bold"></div>
             </div>
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-                <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase flex items-center gap-1">📊 สรุปยอดรวมเดือนนี้</h3>
-                <p class="text-2xl font-black text-indigo-700" id="monthlyTotal">0 <span class="text-xs font-normal text-gray-400">Vials</span></p>
-                <p class="text-[10px] text-gray-400" id="lastUpdatedText italic">อัปเดตล่าสุด: -</p>
-            </div>
-        </div>
-
-        <div class="print-only text-center p-1 border-b-2 border-black">
-            <h2 class="text-sm font-bold">ใบสรุปยอดเบิกยาเคมีบำบัด - รพ.สกลนคร</h2>
-            <p class="text-[9px]">ผู้ตรวจ: <span id="p-checker">เกศสุดา</span> | วันที่: <span id="datePrint"></span></p>
         </div>
 
         <div class="p-2 md:p-4">
             <table class="w-full">
                 <thead>
-                    <tr class="text-gray-400 text-[10px] font-bold border-b no-print uppercase italic">
+                    <tr class="text-gray-400 text-[10px] font-bold border-b no-print uppercase">
                         <th class="pb-2 w-8 text-center">#</th>
                         <th class="pb-2 text-left">รายการยา</th>
-                        <th class="pb-2 w-16 text-center text-orange-500">Target</th>
-                        <th class="pb-2 w-16 text-center text-blue-600 italic">คงคลัง</th>
-                        <th class="pb-2 w-28 text-center">วัน EXP</th>
-                        <th class="pb-2 w-12 text-center text-red-600 font-black">เบิก</th>
+                        <th class="pb-2 w-16 text-center text-orange-400">Target</th>
+                        <th class="pb-2 w-16 text-center text-indigo-500">คงคลัง</th>
+                        <th class="pb-2 w-10 text-center text-red-600">เบิก</th>
+                    </tr>
+                    <tr class="print-only text-[9px] bg-gray-50 uppercase">
+                        <th>#</th><th class="text-left">รายการยา</th><th>Target</th><th>คงคลัง</th><th>ยอดเบิก</th>
                     </tr>
                 </thead>
-                <tbody id="inventoryList"></tbody>
+                <tbody id="inventoryList" class="text-xs"></tbody>
             </table>
         </div>
 
-        <div class="print-only signature-box">
-            <div class="border-t border-black pt-1 italic">ลงชื่อ.................................. (เกศสุดา)</div>
-            <div class="border-t border-black pt-1 italic">ลงชื่อ.................................. (ภญ.นิโลบล)</div>
-        </div>
-
-        <div class="no-print p-4 flex justify-between items-center bg-gray-50 border-t">
-            <button onclick="resetToDefaults()" class="text-[9px] text-gray-400 underline italic">รีเซ็ต Target ปี 2568</button>
-            <button onclick="if(confirm('ล้างข้อมูลสต็อก?')) clearStock()" class="text-[9px] text-red-400 font-bold italic">ล้างสต็อกสัปดาห์นี้</button>
+        <div id="mappingModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+                <h3 class="font-bold text-indigo-900 mb-2">🔍 พบบาร์โค้ดใหม่!</h3>
+                <p class="text-[10px] text-gray-500 mb-4 italic">เลข: <span id="newBarcodeDisplay" class="font-mono text-red-500"></span></p>
+                <label class="block text-xs font-bold mb-1">เลือกชื่อยาที่ตรงกับบาร์โค้ดนี้:</label>
+                <select id="drugSelector" class="w-full border p-2 rounded-lg mb-4 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </select>
+                <div class="flex gap-2">
+                    <button onclick="saveMapping()" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl font-bold">บันทึกข้อมูล</button>
+                    <button onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-500 py-2 rounded-xl font-bold">ยกเลิก</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const defaultDrugs = [
-            { id: 1, name: "5-FU 500 mg/10 ml", target: 700 }, { id: 2, name: "Actinomycin-D", target: 20, isExp: true },
-            { id: 3, name: "Asparaginase", target: 20, isExp: true }, { id: 4, name: "Bleomycin", target: 20 },
+        const initialDrugs = [
+            { id: 1, name: "5-FU 500 mg/10 ml", target: 700 }, { id: 2, name: "Actinomycin-D", target: 20 },
+            { id: 3, name: "Asparaginase", target: 20 }, { id: 4, name: "Bleomycin", target: 20 },
             { id: 5, name: "Bortezomib", target: 20 }, { id: 6, name: "Carboplatin", target: 80 },
             { id: 7, name: "Cisplatin", target: 80 }, { id: 8, name: "Cyclophosphamide", target: 50 },
-            { id: 9, name: "Cytarabine 100 mg", target: 30, isExp: true }, { id: 10, name: "Cytarabine 2 GM", target: 50, isExp: true },
+            { id: 9, name: "Cytarabine 100 mg", target: 30 }, { id: 10, name: "Cytarabine 2 GM", target: 50 },
             { id: 11, name: "Dacarbazine 100 mg", target: 20 }, { id: 12, name: "Dacarbazine 500 mg", target: 10 },
             { id: 13, name: "Docetaxel 20 mg", target: 40 }, { id: 14, name: "Docetaxel 80 mg", target: 30 },
             { id: 15, name: "Doxorubicin", target: 60 }, { id: 16, name: "Etoposide", target: 50 },
             { id: 17, name: "Gemcitabine 200 mg", target: 100 }, { id: 18, name: "Gemcitabine 1 GM", target: 60 },
             { id: 19, name: "HERZUMA 440 mg", target: 25 }, { id: 20, name: "HERZUMA 150 mg", target: 10 },
-            { id: 21, name: "Idarubicin", target: 20, isExp: true }, { id: 22, name: "Ifosfamide", target: 70 },
+            { id: 21, name: "Idarubicin", target: 20 }, { id: 22, name: "Ifosfamide", target: 70 },
             { id: 23, name: "Irinotecan", target: 60 }, { id: 24, name: "Leucovorin", target: 120 },
             { id: 25, name: "Mesna", target: 80 }, { id: 26, name: "Methotrexate 1 GM", target: 50 },
             { id: 27, name: "Methotrexate 50 mg", target: 40 }, { id: 28, name: "Mitomycin 2 mg", target: 20 },
-            { id: 29, name: "Mitomycin 10 mg", target: 10, isExp: true }, { id: 30, name: "Mitoxantrone", target: 10, isExp: true },
+            { id: 29, name: "Mitomycin 10 mg", target: 10 }, { id: 30, name: "Mitoxantrone", target: 10 },
             { id: 31, name: "Oxaliplatin", target: 100 }, { id: 32, name: "Paclitaxel", target: 70 },
             { id: 33, name: "TRUXIMA 100 mg", target: 60 }, { id: 34, name: "TRUXIMA 500 mg", target: 30 },
             { id: 35, name: "Vinblastine", target: 20 }, { id: 36, name: "Vincristine 1 mg", target: 60 },
@@ -118,120 +109,120 @@
             { id: 39, name: "Ganciclovir", target: 1 }, { id: 40, name: "Cefuroxime", target: 10 }
         ];
 
-        let drugs = JSON.parse(localStorage.getItem('oncoTargets')) || defaultDrugs;
-        let history = JSON.parse(localStorage.getItem('oncoHistory')) || [];
+        let drugs = JSON.parse(localStorage.getItem('oncoTargetsV13')) || initialDrugs;
+        let scanner;
+        let tempBarcode = "";
 
         function init() {
-            const today = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
-            document.getElementById('dateNow').innerText = today;
-            document.getElementById('datePrint').innerText = today;
+            document.getElementById('dateNow').innerText = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
             document.getElementById('checkerName').value = localStorage.getItem('checker') || 'เกศสุดา';
             renderTable();
-            renderStats();
+            populateSelector();
         }
 
         function renderTable() {
             const container = document.getElementById('inventoryList');
             container.innerHTML = drugs.map(d => `
-                <tr class="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
-                    <td class="py-2 text-center text-[10px] text-gray-400 no-print font-mono">${d.id}</td>
-                    <td class="print-only text-center text-[9px]">${d.id}</td>
-                    <td class="py-2"><div class="font-bold text-gray-700 leading-tight">${d.name} ${d.isExp ? '<span class="no-print ml-1 exp-badge">EXP</span>' : ''}</div></td>
+                <tr id="row-${d.id}" class="border-b border-gray-100 transition-colors duration-500">
+                    <td class="py-2 text-center text-[9px] text-gray-400 no-print font-mono">${d.id}</td>
+                    <td class="print-only text-center text-[8px]">${d.id}</td>
+                    <td class="py-2"><div class="font-bold text-gray-700 leading-tight">${d.name}</div></td>
                     <td class="text-center">
-                        <input type="number" id="target-${d.id}" value="${d.target}" oninput="updateCalculation(${d.id})" class="w-10 text-center bg-orange-50 no-print font-bold text-orange-700 outline-none rounded" tabindex="-1">
-                        <span class="print-only">${d.target}</span>
+                        <input type="number" id="target-${d.id}" value="${d.target}" oninput="calc(${d.id})" class="w-10 text-center bg-orange-50 font-bold text-orange-600 rounded no-print outline-none" tabindex="-1">
+                        <span class="print-only text-[9px]">${d.target}</span>
                     </td>
                     <td class="text-center no-print">
-                        <input type="number" id="stock-${d.id}" oninput="updateCalculation(${d.id})" onkeydown="handleNav(event, ${d.id})" class="w-12 text-center border border-blue-200 rounded-md py-1 font-bold outline-none focus:bg-blue-50 focus:border-blue-500">
+                        <input type="number" id="stock-${d.id}" oninput="calc(${d.id})" onkeydown="handleNav(event, ${d.id})" class="w-12 text-center border-2 border-indigo-50 rounded-lg py-1 font-bold outline-none focus:ring-2 focus:ring-indigo-400">
                     </td>
-                    <td class="text-center no-print">${d.isExp ? '<input type="date" id="exp-in-'+d.id+'" oninput="syncExp('+d.id+')" class="text-[9px] border border-gray-100 rounded px-1 bg-gray-50" tabindex="-1">' : '-'}</td>
-                    <td class="print-only text-center font-bold" id="p-stock-${d.id}">-</td>
-                    <td class="print-only text-center text-[8px]" id="p-exp-${d.id}">-</td>
-                    <td class="py-2 text-center order-cell"><span id="order-${d.id}" class="font-black text-base text-gray-300">0</span></td>
+                    <td class="print-only text-center text-[9px]" id="p-stock-${d.id}">-</td>
+                    <td class="py-2 text-center order-cell"><span id="order-${d.id}" class="font-black text-gray-300">0</span></td>
                 </tr>
             `).join('');
         }
 
-        function handleNav(e, id) {
-            if (e.key === 'Enter' || e.key === 'ArrowDown') { e.preventDefault(); const nextInput = document.getElementById(`stock-${id + 1}`); if (nextInput) nextInput.focus(); }
-            if (e.key === 'ArrowUp') { e.preventDefault(); const prevInput = document.getElementById(`stock-${id - 1}`); if (prevInput) prevInput.focus(); }
-        }
-
-        function updateCalculation(id) {
-            const targetVal = parseInt(document.getElementById(`target-${id}`).value) || 0;
-            const stockVal = parseInt(document.getElementById(`stock-${id}`).value) || 0;
-            const finalOrder = (targetVal - stockVal) > 0 ? (targetVal - stockVal) : 0;
-            const orderDisplay = document.getElementById(`order-${id}`);
-            orderDisplay.innerText = finalOrder;
-            orderDisplay.className = finalOrder > 0 ? "font-black text-base text-red-600" : "font-black text-base text-green-600 text-opacity-20";
-            document.getElementById(`p-stock-${id}`).innerText = stockVal || "-";
-            const drugIdx = drugs.findIndex(d => d.id === id);
-            drugs[drugIdx].target = targetVal;
-            localStorage.setItem('oncoTargets', JSON.stringify(drugs));
-        }
-
-        function saveOrderToHistory() {
-            const currentMonth = new Date().getMonth();
-            const currentYear = new Date().getFullYear();
-            const orderData = { date: new Date().toISOString(), items: [] };
-            drugs.forEach(d => {
-                const stockVal = parseInt(document.getElementById(`stock-${d.id}`).value) || 0;
-                const finalOrder = (d.target - stockVal) > 0 ? (d.target - stockVal) : 0;
-                if(finalOrder > 0) orderData.items.push({ name: d.name, amount: finalOrder });
-            });
-            if(orderData.items.length > 0) {
-                history.push(orderData);
-                localStorage.setItem('oncoHistory', JSON.stringify(history));
-                renderStats();
+        function toggleScanner() {
+            const wrap = document.getElementById('scanner-wrapper');
+            if (wrap.classList.contains('hidden')) {
+                wrap.classList.remove('hidden');
+                document.getElementById('btnText').innerText = "หยุดสแกน";
+                scanner = new Html5Qrcode("reader");
+                scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 250, height: 120 } }, onScanSuccess);
+            } else {
+                wrap.classList.add('hidden');
+                document.getElementById('btnText').innerText = "เปิดกล้องสแกนยา";
+                if(scanner) scanner.stop();
             }
         }
 
-        function renderStats() {
-            const currentMonth = new Date().getMonth();
-            const currentYear = new Date().getFullYear();
-            const summary = {};
-            let totalVials = 0;
-
-            history.forEach(entry => {
-                const d = new Date(entry.date);
-                if(d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
-                    entry.items.forEach(item => {
-                        summary[item.name] = (summary[item.name] || 0) + item.amount;
-                        totalVials += item.amount;
-                    });
-                }
-            });
-
-            const sorted = Object.entries(summary).sort((a,b) => b[1] - a[1]).slice(0, 5);
-            const topList = document.getElementById('topUsage');
-            topList.innerHTML = sorted.length > 0 ? sorted.map(([name, qty]) => `<div class="flex justify-between"><span>${name}</span><span class="font-bold text-indigo-600">${qty}</span></div>`).join('') : '<p class="text-gray-400 italic">ยังไม่มีข้อมูลการเบิก...</p>';
-            document.getElementById('monthlyTotal').innerHTML = `${totalVials} <span class="text-xs font-normal text-gray-400">Vials</span>`;
-            if(history.length > 0) document.getElementById('lastUpdatedText').innerText = `อัปเดตล่าสุด: ${new Date(history[history.length-1].date).toLocaleString('th-TH')}`;
+        function onScanSuccess(decodedText) {
+            const drug = drugs.find(d => d.barcode === decodedText);
+            if (drug) {
+                const el = document.getElementById(`stock-${drug.id}`);
+                const row = document.getElementById(`row-${drug.id}`);
+                row.classList.add('scanned-highlight');
+                el.focus();
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => row.classList.remove('scanned-highlight'), 1500);
+            } else {
+                // พบบาร์โค้ดใหม่ที่ยังไม่เคยลงทะเบียน
+                tempBarcode = decodedText;
+                document.getElementById('newBarcodeDisplay').innerText = decodedText;
+                document.getElementById('mappingModal').classList.remove('hidden');
+                if(scanner) scanner.pause();
+            }
         }
 
-        function sendToLine() {
-            saveOrderToHistory();
-            let message = `📦 ยอดเบิกยาเคมีบำบัด (${document.getElementById('dateNow').innerText})\n👤 ผู้เบิก: ${document.getElementById('checkerName').value}\n------------------\n`;
-            let items = [];
-            drugs.forEach(d => {
-                const stockVal = parseInt(document.getElementById(`stock-${d.id}`).value) || 0;
-                const finalOrder = (d.target - stockVal) > 0 ? (d.target - stockVal) : 0;
-                if(finalOrder > 0) items.push(`🔹 ${d.name}: ${finalOrder} vial`);
-            });
-            if(items.length === 0) return alert('ไม่มีรายการเบิกครับ');
-            window.location.href = `line://msg/text/${encodeURIComponent(message + items.join('\n'))}`;
+        function populateSelector() {
+            const sel = document.getElementById('drugSelector');
+            sel.innerHTML = `<option value="">-- เลือกชื่อยา --</option>` + drugs.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+        }
+
+        function saveMapping() {
+            const drugId = document.getElementById('drugSelector').value;
+            if(!drugId) return alert('กรุณาเลือกยา');
+            const idx = drugs.findIndex(d => d.id == drugId);
+            drugs[idx].barcode = tempBarcode;
+            localStorage.setItem('oncoTargetsV13', JSON.stringify(drugs));
+            alert(`ลงทะเบียนสำเร็จ: ${drugs[idx].name}`);
+            closeModal();
+            renderTable(); // Update UI
+        }
+
+        function closeModal() {
+            document.getElementById('mappingModal').classList.add('hidden');
+            if(scanner) scanner.resume();
+        }
+
+        function calc(id) {
+            const t = parseInt(document.getElementById(`target-${id}`).value) || 0;
+            const s = parseInt(document.getElementById(`stock-${id}`).value) || 0;
+            const res = (t - s) > 0 ? (t - s) : 0;
+            const el = document.getElementById(`order-${id}`);
+            el.innerText = res;
+            el.className = res > 0 ? "font-black text-red-600" : "font-black text-green-500 opacity-20";
+            document.getElementById(`p-stock-${id}`).innerText = s || "-";
+            const idx = drugs.findIndex(d => d.id === id);
+            drugs[idx].target = t;
+            localStorage.setItem('oncoTargetsV13', JSON.stringify(drugs));
+        }
+
+        function handleNav(e, id) {
+            if (e.key === 'Enter' || e.key === 'ArrowDown') { e.preventDefault(); document.getElementById(`stock-${id+1}`)?.focus(); }
+            if (e.key === 'ArrowUp') { e.preventDefault(); document.getElementById(`stock-${id-1}`)?.focus(); }
         }
 
         function saveChecker() { localStorage.setItem('checker', document.getElementById('checkerName').value); }
-        function syncExp(id) {
-            const dateVal = document.getElementById(`exp-in-${id}`).value;
-            if (dateVal) {
-                const [y, m, d] = dateVal.split('-');
-                document.getElementById(`p-exp-${id}`).innerText = `${d}/${m}/${y.slice(-2)}`;
-            }
+        function sendToLine() {
+            let msg = `📦 ยอดเบิกยา (${document.getElementById('dateNow').innerText})\n👤 ผู้ตรวจ: ${document.getElementById('checkerName').value}\n------------------\n`;
+            let items = drugs.map(d => {
+                const s = parseInt(document.getElementById(`stock-${d.id}`).value) || 0;
+                const o = (d.target - s) > 0 ? (d.target - s) : 0;
+                return o > 0 ? `🔹 ${d.name}: ${o} vial` : null;
+            }).filter(x => x);
+            if(items.length === 0) return alert('ไม่มีรายการเบิก');
+            window.location.href = `line://msg/text/${encodeURIComponent(msg + items.join('\n'))}`;
         }
-        function clearStock() { document.querySelectorAll('[id^="stock-"]').forEach(i => { i.value = ''; i.oninput(); }); }
-        function resetToDefaults() { if(confirm('รีเซ็ต Target?')) { localStorage.removeItem('oncoTargets'); localStorage.removeItem('oncoHistory'); location.reload(); } }
+
         init();
     </script>
 </body>
