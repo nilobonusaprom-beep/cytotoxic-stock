@@ -3,212 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Cytotoxic - Sakon Nakhon Hospital</title>
+    <title>Stock Cytotoxic V8 - Memory Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
-        
-        /* CSS สำหรับการพิมพ์ (จะทำงานเมื่อกดพิมพ์เท่านั้น) */
+        body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
         @media print {
-            @page { size: A4 portrait; margin: 8mm; }
+            @page { size: A4 portrait; margin: 3mm 5mm; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            body { background: white; padding: 0 !important; }
+            body { background: white; padding: 0 !important; margin: 0 !important; }
             .main-container { max-width: 100% !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
-            
-            table { width: 100%; border-collapse: collapse !important; margin-top: 5px; }
-            th, td { border: 1px solid black !important; padding: 2px 4px !important; font-size: 10px !important; line-height: 1.1; }
-            th { background-color: #f3f3f3 !important; -webkit-print-color-adjust: exact; }
-            
-            /* เน้นจำนวนเบิกให้เด่นมากตอนพิมพ์ */
-            .order-cell { font-size: 13px !important; font-weight: 800 !important; text-align: center; background-color: #eeeeee !important; -webkit-print-color-adjust: exact; }
-            .header-doc { border-bottom: 2px solid black; margin-bottom: 10px; }
-            .signature-box { margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 10px; text-align: center; }
+            table { width: 100%; border-collapse: collapse !important; margin-top: 2px; border: 1.2px solid black !important; }
+            th, td { border: 1px solid black !important; padding: 1px 2px !important; font-size: 8.8px !important; line-height: 1; color: black !important; }
+            th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; font-weight: 800 !important; }
+            input { border: none !important; background: transparent !important; padding: 0 !important; height: auto !important; width: 100% !important; pointer-events: none; text-align: center; font-weight: bold; }
+            .order-cell { font-size: 11px !important; font-weight: 900 !important; text-align: center; background-color: #eeeeee !important; -webkit-print-color-adjust: exact; }
+            .signature-box { margin-top: 5px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 8.5px; text-align: center; }
         }
-
         .print-only { display: none; }
-        .exp-badge { font-size: 9px; padding: 1px 4px; background: #fee2e2; color: #ef4444; border-radius: 4px; font-weight: bold; }
-        .input-stock:focus { border-color: #3b82f6; ring: 2px; ring-color: #bfdbfe; }
+        .exp-badge { font-size: 8px; padding: 1px 3px; background: #fee2e2; color: #ef4444; border-radius: 4px; font-weight: bold; }
     </style>
 </head>
-<body class="p-2 md:p-6">
-
-    <div class="max-w-4xl mx-auto main-container bg-white shadow-xl rounded-2xl overflow-hidden">
-        
-        <div class="no-print bg-[#1e3a8a] text-white p-6 shadow-lg">
-            <div class="flex justify-between items-center mb-6">
+<body class="p-1 md:p-6">
+    <div class="max-w-4xl mx-auto main-container bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+        <div class="no-print bg-indigo-900 text-white p-5 shadow-lg">
+            <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h1 class="text-xl font-bold flex items-center gap-2">💊 ระบบคำนวณยอดเบิกยาเคมีบำบัด</h1>
-                    <p class="text-blue-200 text-xs">กลุ่มงานเภสัชกรรม โรงพยาบาลสกลนคร</p>
+                    <h1 class="text-xl font-bold flex items-center gap-2">💊 OncoStock Smart V8</h1>
+                    <p class="text-indigo-300 text-xs italic">Sakon Nakhon Hospital | Persistent Target Enabled</p>
                 </div>
-                <button onclick="window.print()" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-xl font-bold shadow-md transition-all active:scale-95 text-sm flex items-center gap-2">
-                    <span>🖨️ พิมพ์ใบเบิกยา</span>
-                </button>
+                <button onclick="window.print()" class="bg-emerald-500 hover:bg-emerald-600 px-5 py-2 rounded-xl font-bold shadow-md active:scale-95 transition-all text-sm">🖨️ พิมพ์ใบเบิกยา</button>
             </div>
-            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div class="bg-white/10 p-3 rounded-xl border border-white/20">
-                    <label class="block text-[10px] text-blue-200 uppercase font-bold mb-1">วันที่ตรวจสอบ</label>
+                <div class="bg-indigo-800/50 p-2 rounded-lg border border-indigo-700">
+                    <label class="block text-[10px] text-indigo-300 font-bold mb-1 uppercase">วันที่</label>
                     <span id="dateNow" class="font-semibold text-sm"></span>
                 </div>
-                <div class="bg-white/10 p-3 rounded-xl border border-white/20">
-                    <label class="block text-[10px] text-blue-200 uppercase font-bold mb-1">ผู้ตรวจสอบ (เจ้าพนักงาน)</label>
-                    <input type="text" id="checkerName" value="เกศสุดา" class="bg-transparent border-none outline-none w-full font-semibold text-sm placeholder:text-white/40">
+                <div class="bg-indigo-800/50 p-2 rounded-lg border border-indigo-700">
+                    <label class="block text-[10px] text-indigo-300 font-bold mb-1 uppercase">ผู้ตรวจสอบ (เจ้าพนักงาน)</label>
+                    <input type="text" id="checkerName" value="เกศสุดา" oninput="saveChecker()" class="bg-transparent border-none outline-none w-full font-semibold text-sm">
                 </div>
-                <div class="bg-white/10 p-3 rounded-xl border border-white/20">
-                    <label class="block text-[10px] text-blue-200 uppercase font-bold mb-1">เภสัชกรควบคุม</label>
+                <div class="bg-indigo-800/50 p-2 rounded-lg border border-indigo-700">
+                    <label class="block text-[10px] text-indigo-300 font-bold mb-1 uppercase">เภสัชกร</label>
                     <p class="font-semibold text-sm">ภญ.นิโลบล</p>
                 </div>
             </div>
         </div>
 
-        <div class="print-only header-doc text-center p-2">
-            <h2 class="text-lg font-bold">ใบสรุปยอดเบิกยาเคมีบำบัด</h2>
-            <p class="text-[10px]">ผู้ตรวจสอบ: เกศสุดา | วันที่: <span id="datePrint"></span></p>
+        <div class="print-only text-center p-1 border-b-2 border-black">
+            <h2 class="text-sm font-bold">ใบสรุปยอดเบิกยาเคมีบำบัด - รพ.สกลนคร</h2>
+            <p class="text-[9px]">วันที่: <span id="datePrint"></span> | ผู้ตรวจ: <span id="p-checker">เกศสุดา</span> | เภสัชกร: ภญ.นิโลบล</p>
         </div>
 
         <div class="p-2 md:p-4">
-            <table class="w-full text-sm">
+            <table class="w-full">
                 <thead>
-                    <tr class="text-gray-400 text-[10px] font-bold border-b no-print">
-                        <th class="pb-2 w-8">#</th>
+                    <tr class="text-gray-400 text-[10px] font-bold border-b no-print uppercase">
+                        <th class="pb-2 w-8 text-center">#</th>
                         <th class="pb-2 text-left">รายการยา</th>
-                        <th class="pb-2 w-12 text-center">Target</th>
-                        <th class="pb-2 w-24 text-center">คงคลังจริง</th>
-                        <th class="pb-2 w-16 text-center text-blue-600">ยอดเบิก</th>
+                        <th class="pb-2 w-16 text-center text-orange-500">Target</th>
+                        <th class="pb-2 w-16 text-center text-blue-600 uppercase">คงคลัง</th>
+                        <th class="pb-2 w-28 text-center">วัน EXP</th>
+                        <th class="pb-2 w-12 text-center text-red-600">เบิก</th>
                     </tr>
-                    <tr class="print-only">
-                        <th>#</th>
+                    <tr class="print-only bg-gray-50">
+                        <th class="w-6">#</th>
                         <th class="text-left">รายการยา</th>
-                        <th>คงคลัง</th>
-                        <th>Target</th>
-                        <th>ยอดเบิก</th>
+                        <th class="w-12">Target</th>
+                        <th class="w-12">คงคลัง</th>
+                        <th class="w-16">วัน EXP</th>
+                        <th class="w-12">ยอดเบิก</th>
                     </tr>
                 </thead>
-                <tbody id="inventoryList">
-                    </tbody>
+                <tbody id="inventoryList"></tbody>
             </table>
         </div>
 
         <div class="print-only signature-box">
-            <div>
-                <p>ลงชื่อ..................................................</p>
-                <p>( เกศสุดา )</p>
-                <p>ผู้ตรวจนับยา</p>
-            </div>
-            <div>
-                <p>ลงชื่อ..................................................</p>
-                <p>( ภญ.นิโลบล )</p>
-                <p>เภสัชกรควบคุม</p>
-            </div>
+            <div class="border-t border-black pt-1">ลงชื่อ................................................ ผู้ตรวจนับยา</div>
+            <div class="border-t border-black pt-1">ลงชื่อ................................................ เภสัชกรควบคุม</div>
         </div>
-        
-        <div class="no-print p-4 text-center">
-            <button onclick="location.reload()" class="text-xs text-gray-400 hover:text-red-500 transition underline">ล้างข้อมูลใหม่</button>
+
+        <div class="no-print p-4 flex justify-between items-center border-t border-gray-50 bg-gray-50/50">
+            <button onclick="resetToDefaults()" class="text-[10px] text-gray-400 hover:text-orange-500 underline transition-colors">คืนค่าเริ่มต้น Target ปี 2568</button>
+            <button onclick="if(confirm('ล้างจำนวนคงคลังทั้งหมด?')) clearStock()" class="text-[10px] text-red-400 hover:text-red-600 font-bold">ล้างข้อมูลสต็อกสัปดาห์นี้</button>
         </div>
     </div>
 
     <script>
-        const drugs = [
-            { id: 1, name: "5-FU 500 mg/10 ml", target: 700 },
-            { id: 2, name: "Actinomycin-D", target: 20, isExp: true },
-            { id: 3, name: "Asparaginase", target: 20, isExp: true },
-            { id: 4, name: "Bleomycin", target: 20 },
-            { id: 5, name: "Bortezomib", target: 20 },
-            { id: 6, name: "Carboplatin", target: 80 },
-            { id: 7, name: "Cisplatin", target: 80 },
-            { id: 8, name: "Cyclophosphamide", target: 50 },
-            { id: 9, name: "Cytarabine 100 mg", target: 30, isExp: true },
-            { id: 10, name: "Cytarabine 2 GM", target: 50, isExp: true },
-            { id: 11, name: "Dacarbazine 100 mg", target: 20 },
-            { id: 12, name: "Dacarbazine 500 mg", target: 10 },
-            { id: 13, name: "Docetaxel 20 mg", target: 40 },
-            { id: 14, name: "Docetaxel 80 mg", target: 30 },
-            { id: 15, name: "Doxorubicin", target: 60 },
-            { id: 16, name: "Etoposide", target: 50 },
-            { id: 17, name: "Gemcitabine 200 mg", target: 100 },
-            { id: 18, name: "Gemcitabine 1 GM", target: 60 },
-            { id: 19, name: "HERZUMA 440 mg", target: 25 },
-            { id: 20, name: "HERZUMA 150 mg", target: 10 },
-            { id: 21, name: "Idarubicin", target: 20, isExp: true },
-            { id: 22, name: "Ifosfamide", target: 70 },
-            { id: 23, name: "Irinotecan", target: 60 },
-            { id: 24, name: "Leucovorin", target: 120 },
-            { id: 25, name: "Mesna", target: 80 },
-            { id: 26, name: "Methotrexate 1 GM", target: 50 },
-            { id: 27, name: "Methotrexate 50 mg", target: 40 },
-            { id: 28, name: "Mitomycin 2 mg", target: 20 },
-            { id: 29, name: "Mitomycin 10 mg", target: 10, isExp: true },
-            { id: 30, name: "Mitoxantrone", target: 10, isExp: true },
-            { id: 31, name: "Oxaliplatin", target: 100 },
-            { id: 32, name: "Paclitaxel", target: 70 },
-            { id: 33, name: "TRUXIMA 100 mg", target: 60 },
-            { id: 34, name: "TRUXIMA 500 mg", target: 30 },
-            { id: 35, name: "Vinblastine", target: 20 },
-            { id: 36, name: "Vincristine 1 mg", target: 60 },
-            { id: 37, name: "Zoledronic acid", target: 20 },
-            { id: 38, name: "Bevacizumab (VERSAVO)", target: 40 },
-            { id: 39, name: "Ganciclovir", target: 1 },
-            { id: 40, name: "Cefuroxime", target: 10 }
+        const defaultDrugs = [
+            { id: 1, name: "5-FU 500 mg/10 ml", target: 700 }, { id: 2, name: "Actinomycin-D", target: 20, isExp: true },
+            { id: 3, name: "Asparaginase", target: 20, isExp: true }, { id: 4, name: "Bleomycin", target: 20 },
+            { id: 5, name: "Bortezomib", target: 20 }, { id: 6, name: "Carboplatin", target: 80 },
+            { id: 7, name: "Cisplatin", target: 80 }, { id: 8, name: "Cyclophosphamide", target: 50 },
+            { id: 9, name: "Cytarabine 100 mg", target: 30, isExp: true }, { id: 10, name: "Cytarabine 2 GM", target: 50, isExp: true },
+            { id: 11, name: "Dacarbazine 100 mg", target: 20 }, { id: 12, name: "Dacarbazine 500 mg", target: 10 },
+            { id: 13, name: "Docetaxel 20 mg", target: 40 }, { id: 14, name: "Docetaxel 80 mg", target: 30 },
+            { id: 15, name: "Doxorubicin", target: 60 }, { id: 16, name: "Etoposide", target: 50 },
+            { id: 17, name: "Gemcitabine 200 mg", target: 100 }, { id: 18, name: "Gemcitabine 1 GM", target: 60 },
+            { id: 19, name: "HERZUMA 440 mg", target: 25 }, { id: 20, name: "HERZUMA 150 mg", target: 10 },
+            { id: 21, name: "Idarubicin", target: 20, isExp: true }, { id: 22, name: "Ifosfamide", target: 70 },
+            { id: 23, name: "Irinotecan", target: 60 }, { id: 24, name: "Leucovorin", target: 120 },
+            { id: 25, name: "Mesna", target: 80 }, { id: 26, name: "Methotrexate 1 GM", target: 50 },
+            { id: 27, name: "Methotrexate 50 mg", target: 40 }, { id: 28, name: "Mitomycin 2 mg", target: 20 },
+            { id: 29, name: "Mitomycin 10 mg", target: 10, isExp: true }, { id: 30, name: "Mitoxantrone", target: 10, isExp: true },
+            { id: 31, name: "Oxaliplatin", target: 100 }, { id: 32, name: "Paclitaxel", target: 70 },
+            { id: 33, name: "TRUXIMA 100 mg", target: 60 }, { id: 34, name: "TRUXIMA 500 mg", target: 30 },
+            { id: 35, name: "Vinblastine", target: 20 }, { id: 36, name: "Vincristine 1 mg", target: 60 },
+            { id: 37, name: "Zoledronic acid", target: 20 }, { id: 38, name: "Bevacizumab (VERSAVO)", target: 40 },
+            { id: 39, name: "Ganciclovir", target: 1 }, { id: 40, name: "Cefuroxime", target: 10 }
         ];
+
+        let drugs = JSON.parse(localStorage.getItem('oncoTargets')) || defaultDrugs;
 
         function init() {
             const today = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
             document.getElementById('dateNow').innerText = today;
             document.getElementById('datePrint').innerText = today;
-            
+            document.getElementById('checkerName').value = localStorage.getItem('checker') || 'เกศสุดา';
+            renderTable();
+        }
+
+        function renderTable() {
             const container = document.getElementById('inventoryList');
             container.innerHTML = drugs.map(d => `
-                <tr class="border-b border-gray-100 hover:bg-blue-50/50 transition-colors">
-                    <td class="py-3 text-center text-[10px] text-gray-400 font-mono no-print">${d.id}</td>
-                    <td class="print-only text-center">${d.id}</td>
-                    <td class="py-3">
+                <tr class="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
+                    <td class="py-2 text-center text-[10px] text-gray-400 no-print">${d.id}</td>
+                    <td class="print-only text-center text-[9px]">${d.id}</td>
+                    <td class="py-2">
                         <div class="font-bold text-gray-700 leading-tight">
-                            ${d.name}
-                            ${d.isExp ? '<span class="no-print ml-2 exp-badge italic animate-pulse">CHECK EXP</span>' : ''}
+                            ${d.name} ${d.isExp ? '<span class="no-print ml-1 exp-badge animate-pulse">EXP</span>' : ''}
                         </div>
                     </td>
-                    <td class="py-3 text-center no-print">
-                        <span class="px-2 py-1 bg-gray-100 rounded-lg text-gray-500 font-bold">${d.target}</span>
+                    <td class="text-center">
+                        <input type="number" id="target-${d.id}" value="${d.target}" oninput="updateCalculation(${d.id})"
+                            class="w-12 text-center border-none bg-orange-50 rounded no-print font-bold text-orange-700 outline-none">
+                        <span class="print-only">${d.target}</span>
                     </td>
-                    <td class="py-3 no-print">
-                        <div class="flex items-center justify-center gap-2">
-                            ${d.isExp ? '<input type="date" class="text-[9px] border rounded p-1 w-20 outline-none focus:border-blue-400 bg-gray-50">' : ''}
-                            <input type="number" oninput="calc(${d.id}, ${d.target})" id="stock-${d.id}" 
-                                class="input-stock w-16 text-center border-2 border-blue-100 rounded-lg py-1 font-bold outline-none">
-                        </div>
+                    <td class="text-center no-print">
+                        <input type="number" id="stock-${d.id}" oninput="updateCalculation(${d.id})"
+                            class="w-12 text-center border border-blue-100 rounded-md py-1 font-bold outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
                     </td>
-                    <td class="print-only text-center"><span id="p-stock-${d.id}">-</span></td>
-                    <td class="print-only text-center">${d.target}</td>
-                    <td class="py-3 text-center order-cell">
-                        <span id="order-${d.id}" class="font-black text-lg text-gray-300">0</span>
+                    <td class="text-center no-print">
+                        ${d.isExp ? '<input type="date" id="exp-in-'+d.id+'" oninput="syncExp('+d.id+')" class="text-[9px] border border-gray-100 rounded px-1 bg-gray-50">' : '-'}
                     </td>
+                    <td class="print-only text-center" id="p-stock-${d.id}">-</td>
+                    <td class="print-only text-center text-[8px]" id="p-exp-${d.id}">-</td>
+                    <td class="py-2 text-center order-cell"><span id="order-${d.id}" class="font-black text-base text-gray-300">0</span></td>
                 </tr>
             `).join('');
         }
 
-        function calc(id, target) {
-            const val = parseInt(document.getElementById(`stock-${id}`).value) || 0;
-            const diff = target - val;
-            const res = diff > 0 ? diff : 0;
+        function updateCalculation(id) {
+            const targetVal = parseInt(document.getElementById(`target-${id}`).value) || 0;
+            const stockVal = parseInt(document.getElementById(`stock-${id}`).value) || 0;
+            const finalOrder = (targetVal - stockVal) > 0 ? (targetVal - stockVal) : 0;
             
-            const orderEl = document.getElementById(`order-${id}`);
-            orderEl.innerText = res;
-            
-            // ปรับสีตอนใช้งานให้ดูง่าย
-            if (res > 0) {
-                orderEl.classList.remove('text-gray-300', 'text-green-500');
-                orderEl.classList.add('text-red-500');
-            } else {
-                orderEl.classList.remove('text-gray-300', 'text-red-500');
-                orderEl.classList.add('text-green-500');
-            }
+            const orderDisplay = document.getElementById(`order-${id}`);
+            orderDisplay.innerText = finalOrder;
+            orderDisplay.className = finalOrder > 0 ? "font-black text-base text-red-600" : "font-black text-base text-green-600";
 
-            // ส่งค่าไปที่ตารางพิมพ์
-            const printStock = document.getElementById(`p-stock-${id}`);
-            if (printStock) printStock.innerText = val;
+            document.getElementById(`p-stock-${id}`).innerText = stockVal || "-";
+            
+            // Auto-Save Target
+            const drugIdx = drugs.findIndex(d => d.id === id);
+            drugs[drugIdx].target = targetVal;
+            localStorage.setItem('oncoTargets', JSON.stringify(drugs));
         }
+
+        function saveChecker() { localStorage.setItem('checker', document.getElementById('checkerName').value); }
+        function syncExp(id) {
+            const dateVal = document.getElementById(`exp-in-${id}`).value;
+            if (dateVal) {
+                const [y, m, d] = dateVal.split('-');
+                document.getElementById(`p-exp-${id}`).innerText = `${d}/${m}/${y.slice(-2)}`;
+            }
+        }
+        function clearStock() { document.querySelectorAll('[id^="stock-"]').forEach(i => { i.value = ''; i.oninput(); }); }
+        function resetToDefaults() { if(confirm('ต้องการรีเซ็ตค่า Target ทั้งหมดกลับเป็นค่าเริ่มต้นปี 2568?')) { localStorage.removeItem('oncoTargets'); location.reload(); } }
 
         init();
     </script>
