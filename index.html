@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OncoStock V16 - Sakon Nakhon Hospital</title>
+    <title>OncoStock V17 - Sakon Nakhon Hospital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; -webkit-text-size-adjust: 100%; }
         
+        /* การตั้งค่าพิมพ์ (A4 Portrait - 2 Columns) */
         @media print {
             @page { size: A4 portrait; margin: 4mm; }
             .no-print { display: none !important; }
@@ -26,8 +27,13 @@
 
         .print-only { display: none; }
         .sticky-head { position: sticky; top: 0; z-index: 50; }
-        .scanned-anim { animation: highlight 1.5s ease; border: 2px solid #6366f1 !important; }
+        .scanned-anim { animation: highlight 1.5s ease; border: 2.5px solid #6366f1 !important; }
         @keyframes highlight { 0% { background-color: #fef08a; } 100% { background-color: transparent; } }
+        
+        /* Alert EXP สีแดง */
+        .exp-alert { color: #ef4444; font-weight: 800; font-size: 10px; text-transform: uppercase; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
         input[type="number"] { -moz-appearance: textfield; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
@@ -35,13 +41,13 @@
 <body class="p-0">
 
     <div class="no-print sticky-head bg-slate-900 text-white p-3 shadow-md">
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center gap-2">
             <div>
-                <h1 class="text-xs font-black text-indigo-400">OncoStock V16</h1>
+                <h1 class="text-xs font-black text-indigo-400">OncoStock V17</h1>
                 <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">รพ.สกลนคร | <span id="curDate"></span></p>
             </div>
             <div class="flex gap-1">
-                <button onclick="toggleScanner()" class="bg-indigo-600 px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-lg">📷 กล้อง</button>
+                <button onclick="toggleScanner()" class="bg-indigo-600 px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-lg">📷 กล้องสแกน</button>
                 <button onclick="window.print()" class="bg-slate-700 px-3 py-1.5 rounded-lg text-[10px] font-bold">🖨️ พิมพ์</button>
                 <button onclick="sendToLine()" class="bg-[#06c755] px-3 py-1.5 rounded-lg text-[10px] font-bold">📲 LINE</button>
             </div>
@@ -58,8 +64,8 @@
                     <tr>
                         <th class="p-2 w-7">#</th>
                         <th class="p-2 text-left">รายการยา</th>
-                        <th class="p-2 w-10 text-orange-400">Target</th>
-                        <th class="p-2 w-12 text-blue-500">คงคลัง</th>
+                        <th class="p-2 w-10">Target</th>
+                        <th class="p-2 w-12">คงคลัง</th>
                         <th class="p-2 w-8 text-red-500">เบิก</th>
                     </tr>
                 </thead>
@@ -70,8 +76,8 @@
 
     <div class="print-only">
         <div class="text-center mb-1 border-b border-black pb-1">
-            <h2 class="text-sm font-bold">ใบสรุปยอดเบิกยาเคมีบำบัด - Sakon Nakhon Hospital</h2>
-            <p class="text-[8px] italic">ผู้ตรวจ: เกศสุดา | เภสัชกร: ภญ.นิโลบล | วันที่: <span id="p-date"></span></p>
+            <h2 class="text-sm font-bold">ใบสรุปยอดเบิกยาเคมีบำบัด - โรงพยาบาลสกลนคร</h2>
+            <p class="text-[8px] italic">ผู้ตรวจสอบ: เกศสุดา | เภสัชกร: ภญ.นิโลบล | วันที่: <span id="p-date"></span></p>
         </div>
         <div class="print-layout">
             <div class="print-col" id="col1"></div>
@@ -83,9 +89,21 @@
         </div>
     </div>
 
+    <div id="mappingModal" class="hidden fixed inset-0 bg-slate-900/90 flex items-center justify-center p-6 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm">
+            <h3 class="font-bold text-slate-900 mb-2">🔍 พบบาร์โค้ดใหม่</h3>
+            <p class="text-[10px] text-indigo-600 font-mono mb-4" id="newCodeDisplay"></p>
+            <label class="block text-xs font-bold mb-1 italic">สแกนตัวนี้คือยาชื่อว่า:</label>
+            <select id="drugSel" class="w-full border p-2 rounded-lg text-sm mb-4"></select>
+            <div class="flex gap-2">
+                <button onclick="saveBarcode()" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg font-bold">บันทึก</button>
+                <button onclick="closeModal()" class="flex-1 bg-slate-100 text-slate-500 py-2 rounded-lg font-bold">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // รายการยาอ้างอิงจากรายการที่คุณพิมพ์มาล่าสุด
-        const drugList = [
+        const initialDrugs = [
             { id: 1, name: "5-FU 500 mg/10 ml", target: 700 }, { id: 2, name: "Actinomycin-D", target: 20, isExp: true },
             { id: 3, name: "Asparaginase", target: 20, isExp: true }, { id: 4, name: "Bleomycin", target: 20 },
             { id: 5, name: "Bortezomib", target: 20 }, { id: 6, name: "Carboplatin", target: 80 },
@@ -108,15 +126,16 @@
             { id: 39, name: "Ganciclovir", target: 1 }, { id: 40, name: "Cefuroxime", target: 10 }
         ];
 
-        let drugs = JSON.parse(localStorage.getItem('oncoTargetsV16')) || drugList;
-        let scanner;
+        let drugs = JSON.parse(localStorage.getItem('oncoV17_Data')) || initialDrugs;
+        let html5QrCode;
+        let lastScannedCode = "";
 
         function init() {
-            const today = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
-            document.getElementById('curDate').innerText = today;
+            document.getElementById('curDate').innerText = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
             document.getElementById('p-date').innerText = new Date().toLocaleDateString('th-TH');
             renderUI();
             updatePrint();
+            populateSel();
         }
 
         function renderUI() {
@@ -126,7 +145,7 @@
                     <td class="p-1 text-center text-[7px] text-slate-300 font-bold">${d.id}</td>
                     <td class="p-1">
                         <div class="font-bold text-slate-700 text-[10px] leading-tight">${d.name}</div>
-                        ${d.isExp ? `<input type="date" id="e-${d.id}" oninput="syncExp(${d.id})" class="text-[8px] bg-slate-50 border rounded px-1 w-full h-5 mt-0.5 outline-none" tabindex="-1">` : ''}
+                        ${d.isExp ? `<div class="exp-alert">!!! CHECK EXP</div><input type="date" id="e-${d.id}" oninput="syncExp(${d.id})" class="text-[8px] bg-slate-50 border rounded px-1 w-full h-5 outline-none" tabindex="-1">` : ''}
                     </td>
                     <td class="text-center"><input type="number" id="t-${d.id}" value="${d.target}" oninput="calc(${d.id})" class="w-8 text-center bg-orange-50 font-bold text-orange-600 rounded text-[10px] outline-none" tabindex="-1"></td>
                     <td class="text-center px-1"><input type="number" id="s-${d.id}" inputmode="numeric" oninput="calc(${d.id})" onkeydown="handleNav(event, ${d.id})" class="w-10 text-center border-2 border-indigo-100 rounded font-black text-indigo-600 h-8 outline-none focus:border-indigo-500 shadow-sm"></td>
@@ -137,15 +156,15 @@
 
         function updatePrint() {
             const split = Math.ceil(drugs.length / 2);
-            const buildTable = (data) => `
+            const buildTbl = (data) => `
                 <table>
                     <thead><tr><th>#</th><th>รายการยา</th><th>สต็อก</th><th>เบิก</th></tr></thead>
                     <tbody>
-                        ${data.map(d => `<tr><td class="text-center">${d.id}</td><td>${d.name} ${d.isExp ? '<span style="font-size:7px" id="p-e-'+d.id+'"></span>' : ''}</td><td class="text-center" id="p-s-${d.id}">-</td><td class="order-bold" id="p-o-${d.id}">0</td></tr>`).join('')}
+                        ${data.map(d => `<tr><td class="text-center">${d.id}</td><td>${d.name} ${d.isExp ? '<span style="font-size:7px; color:red" id="p-e-'+d.id+'"></span>' : ''}</td><td class="text-center" id="p-s-${d.id}">-</td><td class="order-bold" id="p-o-${d.id}">0</td></tr>`).join('')}
                     </tbody>
                 </table>`;
-            document.getElementById('col1').innerHTML = buildTable(drugs.slice(0, split));
-            document.getElementById('col2').innerHTML = buildTable(drugs.slice(split));
+            document.getElementById('col1').innerHTML = buildTbl(drugs.slice(0, split));
+            document.getElementById('col2').innerHTML = buildTbl(drugs.slice(split));
         }
 
         function calc(id) {
@@ -158,54 +177,85 @@
             document.getElementById(`p-o-${id}`).innerText = res || "0";
             const idx = drugs.findIndex(d => d.id === id);
             drugs[idx].target = t;
-            localStorage.setItem('oncoTargetsV16', JSON.stringify(drugs));
+            localStorage.setItem('oncoV17_Data', JSON.stringify(drugs));
         }
 
         function handleNav(e, id) {
-            if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); document.getElementById(`s-${id+1}`)?.focus(); }
-            if (e.key === 'ArrowUp') { e.preventDefault(); document.getElementById(`s-${id-1}`)?.focus(); }
+            if (e.key === 'ArrowDown' || e.key === 'Enter') { 
+                e.preventDefault(); 
+                document.getElementById(`s-${id+1}`)?.focus(); 
+            }
+            if (e.key === 'ArrowUp') { 
+                e.preventDefault(); 
+                document.getElementById(`s-${id-1}`)?.focus(); 
+            }
         }
 
         function toggleScanner() {
             const wrap = document.getElementById('scan-wrap');
             if (wrap.classList.contains('hidden')) {
                 wrap.classList.remove('hidden');
-                scanner = new Html5Qrcode("reader");
-                scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 250, height: 120 } }, onScanSuccess);
+                html5QrCode = new Html5Qrcode("reader");
+                html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: { width: 250, height: 120 } }, onScanSuccess);
             } else {
                 wrap.classList.add('hidden');
-                if(scanner) scanner.stop();
+                if(html5QrCode) html5QrCode.stop();
             }
         }
 
-        function onScanSuccess(text) {
-            const drug = drugs.find(d => d.barcode === text);
+        function onScanSuccess(code) {
+            const drug = drugs.find(d => d.barcode === code);
             if (drug) {
+                const el = document.getElementById(`s-${drug.id}`);
                 const row = document.getElementById(`row-${drug.id}`);
-                const input = document.getElementById(`s-${drug.id}`);
                 row.classList.add('scanned-anim');
-                input.focus();
-                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.focus();
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 setTimeout(() => row.classList.remove('scanned-anim'), 1500);
+            } else {
+                lastScannedCode = code;
+                document.getElementById('newCodeDisplay').innerText = code;
+                document.getElementById('mappingModal').classList.remove('hidden');
+                if(html5QrCode) html5QrCode.pause();
             }
+        }
+
+        function populateSel() {
+            const sel = document.getElementById('drugSel');
+            sel.innerHTML = `<option value="">-- เลือกชื่อยา --</option>` + drugs.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+        }
+
+        function saveBarcode() {
+            const id = document.getElementById('drugSel').value;
+            if(!id) return alert('เลือกยาด้วยครับ');
+            const idx = drugs.findIndex(d => d.id == id);
+            drugs[idx].barcode = lastScannedCode;
+            localStorage.setItem('oncoV17_Data', JSON.stringify(drugs));
+            closeModal();
+            renderUI();
+        }
+
+        function closeModal() {
+            document.getElementById('mappingModal').classList.add('hidden');
+            if(html5QrCode) html5QrCode.resume();
         }
 
         function syncExp(id) {
-            const val = document.getElementById(`e-${id}`).value;
-            if (val) {
-                const [y, m, d] = val.split('-');
+            const v = document.getElementById(`e-${id}`).value;
+            if (v) {
+                const [y, m, d] = v.split('-');
                 document.getElementById(`p-e-${id}`).innerText = ` (EXP: ${d}/${m}/${y.slice(-2)})`;
             }
         }
 
         function sendToLine() {
-            let msg = `📦 สรุปเบิกยาเคมี (${document.getElementById('curDate').innerText})\n👤 เกศสุดา\n------------------\n`;
+            let msg = `📦 ยอดเบิกยา (${document.getElementById('curDate').innerText})\n👤 เกศสุดา\n------------------\n`;
             let items = drugs.map(d => {
                 const s = parseInt(document.getElementById(`s-${d.id}`).value) || 0;
                 const o = (d.target - s) > 0 ? (d.target - s) : 0;
                 return o > 0 ? `🔹 ${d.name}: ${o} vial` : null;
             }).filter(x => x);
-            if(items.length === 0) return alert('ยังไม่มีรายการที่ต้องเบิกครับ');
+            if(items.length === 0) return alert('ไม่มีรายการเบิกครับ');
             window.location.href = `line://msg/text/${encodeURIComponent(msg + items.join('\n'))}`;
         }
 
