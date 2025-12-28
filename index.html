@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Cytotoxic V8 - Memory Edition</title>
+    <title>OncoStock V11 - Analytics Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -14,66 +14,69 @@
             .print-only { display: block !important; }
             body { background: white; padding: 0 !important; margin: 0 !important; }
             .main-container { max-width: 100% !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
-            table { width: 100%; border-collapse: collapse !important; margin-top: 2px; border: 1.2px solid black !important; }
+            table { width: 100%; border-collapse: collapse !important; border: 1.2px solid black !important; }
             th, td { border: 1px solid black !important; padding: 1px 2px !important; font-size: 8.8px !important; line-height: 1; color: black !important; }
-            th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; font-weight: 800 !important; }
-            input { border: none !important; background: transparent !important; padding: 0 !important; height: auto !important; width: 100% !important; pointer-events: none; text-align: center; font-weight: bold; }
-            .order-cell { font-size: 11px !important; font-weight: 900 !important; text-align: center; background-color: #eeeeee !important; -webkit-print-color-adjust: exact; }
+            th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
+            input { border: none !important; pointer-events: none; text-align: center; font-weight: bold; }
+            .order-cell { font-size: 11px !important; font-weight: 900 !important; background-color: #eeeeee !important; -webkit-print-color-adjust: exact; }
             .signature-box { margin-top: 5px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 8.5px; text-align: center; }
         }
         .print-only { display: none; }
         .exp-badge { font-size: 8px; padding: 1px 3px; background: #fee2e2; color: #ef4444; border-radius: 4px; font-weight: bold; }
+        .dashboard-card { background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%); }
     </style>
 </head>
 <body class="p-1 md:p-6">
     <div class="max-w-4xl mx-auto main-container bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
-        <div class="no-print bg-indigo-900 text-white p-5 shadow-lg">
-            <div class="flex justify-between items-center mb-4">
+        
+        <div class="no-print dashboard-card text-white p-5 shadow-lg">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <div>
-                    <h1 class="text-xl font-bold flex items-center gap-2">💊 OncoStock Smart V8</h1>
-                    <p class="text-indigo-300 text-xs italic">Sakon Nakhon Hospital | Persistent Target Enabled</p>
+                    <h1 class="text-xl font-bold flex items-center gap-2">💊 OncoStock Smart V11</h1>
+                    <p class="text-indigo-300 text-xs italic">Analytics & Requisition Dashboard</p>
                 </div>
-                <button onclick="window.print()" class="bg-emerald-500 hover:bg-emerald-600 px-5 py-2 rounded-xl font-bold shadow-md active:scale-95 transition-all text-sm">🖨️ พิมพ์ใบเบิกยา</button>
+                <div class="flex gap-2">
+                    <button onclick="sendToLine()" class="bg-[#06c755] hover:bg-[#05b34c] px-4 py-2 rounded-xl font-bold shadow-md active:scale-95 transition-all text-sm flex items-center gap-2">📲 ส่ง Line</button>
+                    <button onclick="window.print()" class="bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-xl font-bold shadow-md active:scale-95 transition-all text-sm italic">🖨️ พิมพ์</button>
+                </div>
             </div>
+            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div class="bg-indigo-800/50 p-2 rounded-lg border border-indigo-700">
-                    <label class="block text-[10px] text-indigo-300 font-bold mb-1 uppercase">วันที่</label>
-                    <span id="dateNow" class="font-semibold text-sm"></span>
+                <div class="bg-white/10 p-2 rounded-lg border border-white/10"><label class="block text-[10px] opacity-60 font-bold mb-1 uppercase">วันที่</label><span id="dateNow" class="font-semibold text-sm"></span></div>
+                <div class="bg-white/10 p-2 rounded-lg border border-white/10"><label class="block text-[10px] opacity-60 font-bold mb-1 uppercase">ผู้ตรวจ</label><input type="text" id="checkerName" value="เกศสุดา" oninput="saveChecker()" class="bg-transparent border-none outline-none w-full font-semibold text-sm"></div>
+                <div class="bg-white/10 p-2 rounded-lg border border-white/10"><label class="block text-[10px] opacity-60 font-bold mb-1 uppercase">เภสัชกร</label><p class="font-semibold text-sm uppercase">ภญ.นิโลบล</p></div>
+            </div>
+        </div>
+
+        <div class="no-print bg-gray-50 p-4 border-b grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase flex items-center gap-1">📈 Top 5 Usage (เดือนนี้)</h3>
+                <div id="topUsage" class="text-xs space-y-1">
+                    <p class="text-gray-400 italic">ยังไม่มีข้อมูลการเบิก...</p>
                 </div>
-                <div class="bg-indigo-800/50 p-2 rounded-lg border border-indigo-700">
-                    <label class="block text-[10px] text-indigo-300 font-bold mb-1 uppercase">ผู้ตรวจสอบ (เจ้าพนักงาน)</label>
-                    <input type="text" id="checkerName" value="เกศสุดา" oninput="saveChecker()" class="bg-transparent border-none outline-none w-full font-semibold text-sm">
-                </div>
-                <div class="bg-indigo-800/50 p-2 rounded-lg border border-indigo-700">
-                    <label class="block text-[10px] text-indigo-300 font-bold mb-1 uppercase">เภสัชกร</label>
-                    <p class="font-semibold text-sm">ภญ.นิโลบล</p>
-                </div>
+            </div>
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase flex items-center gap-1">📊 สรุปยอดรวมเดือนนี้</h3>
+                <p class="text-2xl font-black text-indigo-700" id="monthlyTotal">0 <span class="text-xs font-normal text-gray-400">Vials</span></p>
+                <p class="text-[10px] text-gray-400" id="lastUpdatedText italic">อัปเดตล่าสุด: -</p>
             </div>
         </div>
 
         <div class="print-only text-center p-1 border-b-2 border-black">
             <h2 class="text-sm font-bold">ใบสรุปยอดเบิกยาเคมีบำบัด - รพ.สกลนคร</h2>
-            <p class="text-[9px]">วันที่: <span id="datePrint"></span> | ผู้ตรวจ: <span id="p-checker">เกศสุดา</span> | เภสัชกร: ภญ.นิโลบล</p>
+            <p class="text-[9px]">ผู้ตรวจ: <span id="p-checker">เกศสุดา</span> | วันที่: <span id="datePrint"></span></p>
         </div>
 
         <div class="p-2 md:p-4">
             <table class="w-full">
                 <thead>
-                    <tr class="text-gray-400 text-[10px] font-bold border-b no-print uppercase">
+                    <tr class="text-gray-400 text-[10px] font-bold border-b no-print uppercase italic">
                         <th class="pb-2 w-8 text-center">#</th>
                         <th class="pb-2 text-left">รายการยา</th>
                         <th class="pb-2 w-16 text-center text-orange-500">Target</th>
-                        <th class="pb-2 w-16 text-center text-blue-600 uppercase">คงคลัง</th>
+                        <th class="pb-2 w-16 text-center text-blue-600 italic">คงคลัง</th>
                         <th class="pb-2 w-28 text-center">วัน EXP</th>
-                        <th class="pb-2 w-12 text-center text-red-600">เบิก</th>
-                    </tr>
-                    <tr class="print-only bg-gray-50">
-                        <th class="w-6">#</th>
-                        <th class="text-left">รายการยา</th>
-                        <th class="w-12">Target</th>
-                        <th class="w-12">คงคลัง</th>
-                        <th class="w-16">วัน EXP</th>
-                        <th class="w-12">ยอดเบิก</th>
+                        <th class="pb-2 w-12 text-center text-red-600 font-black">เบิก</th>
                     </tr>
                 </thead>
                 <tbody id="inventoryList"></tbody>
@@ -81,13 +84,13 @@
         </div>
 
         <div class="print-only signature-box">
-            <div class="border-t border-black pt-1">ลงชื่อ................................................ ผู้ตรวจนับยา</div>
-            <div class="border-t border-black pt-1">ลงชื่อ................................................ เภสัชกรควบคุม</div>
+            <div class="border-t border-black pt-1 italic">ลงชื่อ.................................. (เกศสุดา)</div>
+            <div class="border-t border-black pt-1 italic">ลงชื่อ.................................. (ภญ.นิโลบล)</div>
         </div>
 
-        <div class="no-print p-4 flex justify-between items-center border-t border-gray-50 bg-gray-50/50">
-            <button onclick="resetToDefaults()" class="text-[10px] text-gray-400 hover:text-orange-500 underline transition-colors">คืนค่าเริ่มต้น Target ปี 2568</button>
-            <button onclick="if(confirm('ล้างจำนวนคงคลังทั้งหมด?')) clearStock()" class="text-[10px] text-red-400 hover:text-red-600 font-bold">ล้างข้อมูลสต็อกสัปดาห์นี้</button>
+        <div class="no-print p-4 flex justify-between items-center bg-gray-50 border-t">
+            <button onclick="resetToDefaults()" class="text-[9px] text-gray-400 underline italic">รีเซ็ต Target ปี 2568</button>
+            <button onclick="if(confirm('ล้างข้อมูลสต็อก?')) clearStock()" class="text-[9px] text-red-400 font-bold italic">ล้างสต็อกสัปดาห์นี้</button>
         </div>
     </div>
 
@@ -116,6 +119,7 @@
         ];
 
         let drugs = JSON.parse(localStorage.getItem('oncoTargets')) || defaultDrugs;
+        let history = JSON.parse(localStorage.getItem('oncoHistory')) || [];
 
         function init() {
             const today = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -123,53 +127,99 @@
             document.getElementById('datePrint').innerText = today;
             document.getElementById('checkerName').value = localStorage.getItem('checker') || 'เกศสุดา';
             renderTable();
+            renderStats();
         }
 
         function renderTable() {
             const container = document.getElementById('inventoryList');
             container.innerHTML = drugs.map(d => `
                 <tr class="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
-                    <td class="py-2 text-center text-[10px] text-gray-400 no-print">${d.id}</td>
+                    <td class="py-2 text-center text-[10px] text-gray-400 no-print font-mono">${d.id}</td>
                     <td class="print-only text-center text-[9px]">${d.id}</td>
-                    <td class="py-2">
-                        <div class="font-bold text-gray-700 leading-tight">
-                            ${d.name} ${d.isExp ? '<span class="no-print ml-1 exp-badge animate-pulse">EXP</span>' : ''}
-                        </div>
-                    </td>
+                    <td class="py-2"><div class="font-bold text-gray-700 leading-tight">${d.name} ${d.isExp ? '<span class="no-print ml-1 exp-badge">EXP</span>' : ''}</div></td>
                     <td class="text-center">
-                        <input type="number" id="target-${d.id}" value="${d.target}" oninput="updateCalculation(${d.id})"
-                            class="w-12 text-center border-none bg-orange-50 rounded no-print font-bold text-orange-700 outline-none">
+                        <input type="number" id="target-${d.id}" value="${d.target}" oninput="updateCalculation(${d.id})" class="w-10 text-center bg-orange-50 no-print font-bold text-orange-700 outline-none rounded" tabindex="-1">
                         <span class="print-only">${d.target}</span>
                     </td>
                     <td class="text-center no-print">
-                        <input type="number" id="stock-${d.id}" oninput="updateCalculation(${d.id})"
-                            class="w-12 text-center border border-blue-100 rounded-md py-1 font-bold outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                        <input type="number" id="stock-${d.id}" oninput="updateCalculation(${d.id})" onkeydown="handleNav(event, ${d.id})" class="w-12 text-center border border-blue-200 rounded-md py-1 font-bold outline-none focus:bg-blue-50 focus:border-blue-500">
                     </td>
-                    <td class="text-center no-print">
-                        ${d.isExp ? '<input type="date" id="exp-in-'+d.id+'" oninput="syncExp('+d.id+')" class="text-[9px] border border-gray-100 rounded px-1 bg-gray-50">' : '-'}
-                    </td>
-                    <td class="print-only text-center" id="p-stock-${d.id}">-</td>
+                    <td class="text-center no-print">${d.isExp ? '<input type="date" id="exp-in-'+d.id+'" oninput="syncExp('+d.id+')" class="text-[9px] border border-gray-100 rounded px-1 bg-gray-50" tabindex="-1">' : '-'}</td>
+                    <td class="print-only text-center font-bold" id="p-stock-${d.id}">-</td>
                     <td class="print-only text-center text-[8px]" id="p-exp-${d.id}">-</td>
                     <td class="py-2 text-center order-cell"><span id="order-${d.id}" class="font-black text-base text-gray-300">0</span></td>
                 </tr>
             `).join('');
         }
 
+        function handleNav(e, id) {
+            if (e.key === 'Enter' || e.key === 'ArrowDown') { e.preventDefault(); const nextInput = document.getElementById(`stock-${id + 1}`); if (nextInput) nextInput.focus(); }
+            if (e.key === 'ArrowUp') { e.preventDefault(); const prevInput = document.getElementById(`stock-${id - 1}`); if (prevInput) prevInput.focus(); }
+        }
+
         function updateCalculation(id) {
             const targetVal = parseInt(document.getElementById(`target-${id}`).value) || 0;
             const stockVal = parseInt(document.getElementById(`stock-${id}`).value) || 0;
             const finalOrder = (targetVal - stockVal) > 0 ? (targetVal - stockVal) : 0;
-            
             const orderDisplay = document.getElementById(`order-${id}`);
             orderDisplay.innerText = finalOrder;
-            orderDisplay.className = finalOrder > 0 ? "font-black text-base text-red-600" : "font-black text-base text-green-600";
-
+            orderDisplay.className = finalOrder > 0 ? "font-black text-base text-red-600" : "font-black text-base text-green-600 text-opacity-20";
             document.getElementById(`p-stock-${id}`).innerText = stockVal || "-";
-            
-            // Auto-Save Target
             const drugIdx = drugs.findIndex(d => d.id === id);
             drugs[drugIdx].target = targetVal;
             localStorage.setItem('oncoTargets', JSON.stringify(drugs));
+        }
+
+        function saveOrderToHistory() {
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const orderData = { date: new Date().toISOString(), items: [] };
+            drugs.forEach(d => {
+                const stockVal = parseInt(document.getElementById(`stock-${d.id}`).value) || 0;
+                const finalOrder = (d.target - stockVal) > 0 ? (d.target - stockVal) : 0;
+                if(finalOrder > 0) orderData.items.push({ name: d.name, amount: finalOrder });
+            });
+            if(orderData.items.length > 0) {
+                history.push(orderData);
+                localStorage.setItem('oncoHistory', JSON.stringify(history));
+                renderStats();
+            }
+        }
+
+        function renderStats() {
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const summary = {};
+            let totalVials = 0;
+
+            history.forEach(entry => {
+                const d = new Date(entry.date);
+                if(d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+                    entry.items.forEach(item => {
+                        summary[item.name] = (summary[item.name] || 0) + item.amount;
+                        totalVials += item.amount;
+                    });
+                }
+            });
+
+            const sorted = Object.entries(summary).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            const topList = document.getElementById('topUsage');
+            topList.innerHTML = sorted.length > 0 ? sorted.map(([name, qty]) => `<div class="flex justify-between"><span>${name}</span><span class="font-bold text-indigo-600">${qty}</span></div>`).join('') : '<p class="text-gray-400 italic">ยังไม่มีข้อมูลการเบิก...</p>';
+            document.getElementById('monthlyTotal').innerHTML = `${totalVials} <span class="text-xs font-normal text-gray-400">Vials</span>`;
+            if(history.length > 0) document.getElementById('lastUpdatedText').innerText = `อัปเดตล่าสุด: ${new Date(history[history.length-1].date).toLocaleString('th-TH')}`;
+        }
+
+        function sendToLine() {
+            saveOrderToHistory();
+            let message = `📦 ยอดเบิกยาเคมีบำบัด (${document.getElementById('dateNow').innerText})\n👤 ผู้เบิก: ${document.getElementById('checkerName').value}\n------------------\n`;
+            let items = [];
+            drugs.forEach(d => {
+                const stockVal = parseInt(document.getElementById(`stock-${d.id}`).value) || 0;
+                const finalOrder = (d.target - stockVal) > 0 ? (d.target - stockVal) : 0;
+                if(finalOrder > 0) items.push(`🔹 ${d.name}: ${finalOrder} vial`);
+            });
+            if(items.length === 0) return alert('ไม่มีรายการเบิกครับ');
+            window.location.href = `line://msg/text/${encodeURIComponent(message + items.join('\n'))}`;
         }
 
         function saveChecker() { localStorage.setItem('checker', document.getElementById('checkerName').value); }
@@ -181,8 +231,7 @@
             }
         }
         function clearStock() { document.querySelectorAll('[id^="stock-"]').forEach(i => { i.value = ''; i.oninput(); }); }
-        function resetToDefaults() { if(confirm('ต้องการรีเซ็ตค่า Target ทั้งหมดกลับเป็นค่าเริ่มต้นปี 2568?')) { localStorage.removeItem('oncoTargets'); location.reload(); } }
-
+        function resetToDefaults() { if(confirm('รีเซ็ต Target?')) { localStorage.removeItem('oncoTargets'); localStorage.removeItem('oncoHistory'); location.reload(); } }
         init();
     </script>
 </body>
