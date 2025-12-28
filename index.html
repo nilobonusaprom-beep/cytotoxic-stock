@@ -3,242 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OncoStock V19 - Industrial Scanner</title>
+    <title>OncoStock V15 - One Page Print</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; -webkit-text-size-adjust: 100%; }
+        
+        /* การตั้งค่าพิมพ์ (A4 Portrait - 2 Columns) */
         @media print {
-            @page { size: A4 portrait; margin: 4mm; }
+            @page { size: A4 portrait; margin: 5mm; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
             body { background: white; padding: 0 !important; }
-            .print-layout { display: flex; gap: 8px; width: 100%; }
-            .print-col { flex: 1; }
-            table { width: 100%; border-collapse: collapse !important; border: 1.2px solid black !important; }
-            th, td { border: 1px solid black !important; padding: 1px 3px !important; font-size: 8.5px !important; line-height: 1.1; color: black !important; }
-            th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; font-weight: 800; }
-            .order-bold { font-size: 10px !important; font-weight: 900 !important; text-align: center; background-color: #eee !important; -webkit-print-color-adjust: exact; }
-            .sig { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 8px; text-align: center; }
+            .print-container { display: flex; gap: 10px; width: 100%; }
+            .print-column { flex: 1; }
+            table { width: 100%; border-collapse: collapse !important; border: 1px solid black !important; }
+            th, td { border: 1px solid black !important; padding: 1px 3px !important; font-size: 9px !important; line-height: 1.2; }
+            th { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
+            .order-bold { font-size: 11px !important; font-weight: 800 !important; text-align: center; background-color: #eee !important; -webkit-print-color-adjust: exact; }
         }
+
         .print-only { display: none; }
-        .sticky-h { position: sticky; top: 0; z-index: 50; }
-        .scanned-row { animation: flash 1.5s ease; border: 3px solid #6366f1 !important; }
-        @keyframes flash { 0% { background-color: #fef08a; } 100% { background-color: transparent; } }
-        .exp-red { color: #ef4444; font-weight: 800; font-size: 9px; animation: blink 1s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        input[type="number"] { -moz-appearance: textfield; border-radius: 6px; }
+        .sticky-header { position: sticky; top: 0; z-index: 40; }
+        .scanned-row { background-color: #fef08a !important; transition: background-color 2s; }
+        input[type="number"] { -moz-appearance: textfield; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="p-0">
 
-    <div class="no-print sticky-h bg-slate-900 text-white p-3 shadow-xl">
+    <div class="no-print sticky-header bg-slate-900 text-white p-3 shadow-lg">
         <div class="flex justify-between items-center gap-2">
             <div>
-                <h1 class="text-xs font-black text-indigo-400">OncoStock V19</h1>
-                <p class="text-[8px] text-slate-400 font-bold uppercase">รพ.สกลนคร | <span id="dNow"></span></p>
+                <h1 class="text-sm font-black text-indigo-400">OncoStock PRO V15</h1>
+                <p class="text-[9px] text-slate-400 font-bold uppercase">รพ.สกลนคร | <span id="dateNow"></span></p>
             </div>
             <div class="flex gap-1">
-                <button onclick="toggleScanner()" id="btnScan" class="bg-indigo-600 px-3 py-1.5 rounded-xl text-[10px] font-bold shadow-lg transition">📷 เปิดสแกน</button>
-                <button onclick="window.print()" class="bg-slate-700 px-3 py-1.5 rounded-xl text-[10px] font-bold italic">🖨️ พิมพ์</button>
-                <button onclick="sendToLine()" class="bg-[#06c755] px-3 py-1.5 rounded-xl text-[10px] font-bold">📲 LINE</button>
+                <button onclick="toggleScanner()" class="bg-indigo-600 px-3 py-1.5 rounded-lg text-[10px] font-bold">📷 กล้อง</button>
+                <button onclick="sendToLine()" class="bg-[#06c755] px-3 py-1.5 rounded-lg text-[10px] font-bold">📲 Line</button>
+                <button onclick="window.print()" class="bg-slate-700 px-3 py-1.5 rounded-lg text-[10px] font-bold">🖨️ พิมพ์</button>
             </div>
         </div>
-        <div id="scan-area" class="hidden mt-2 rounded-xl overflow-hidden border-2 border-indigo-500 bg-black">
+        <div id="scanner-wrapper" class="hidden mt-2 rounded-lg overflow-hidden border-2 border-indigo-500 bg-black">
             <div id="reader"></div>
         </div>
     </div>
 
-    <div class="no-print p-2 pb-12">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="no-print p-2">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <table class="w-full text-xs">
                 <thead class="bg-slate-50 text-slate-400 text-[9px] uppercase font-black border-b italic">
                     <tr>
-                        <th class="p-2 w-7 text-center">#</th>
-                        <th class="p-2 text-left uppercase">Drug Name</th>
-                        <th class="p-2 w-10 text-orange-400">Target</th>
-                        <th class="p-2 w-12 text-indigo-600 font-black">Stock</th>
-                        <th class="p-2 w-8 text-red-500 italic">เบิก</th>
+                        <th class="p-2 w-8">#</th>
+                        <th class="p-2 text-left">รายการยา (สแกนเพื่อค้นหา)</th>
+                        <th class="p-2 w-12">Target</th>
+                        <th class="p-2 w-14">คงคลัง</th>
+                        <th class="p-2 w-10 text-red-500">เบิก</th>
                     </tr>
                 </thead>
-                <tbody id="inventoryBody"></tbody>
+                <tbody id="inventoryList"></tbody>
             </table>
         </div>
     </div>
 
-    <div class="print-only">
-        <div class="text-center mb-1 border-b-2 border-slate-900 pb-1">
+    <div class="print-only p-2">
+        <div class="text-center mb-2 border-b border-black pb-1">
             <h2 class="text-sm font-bold">ใบสรุปยอดเบิกยาเคมีบำบัด - โรงพยาบาลสกลนคร</h2>
-            <p class="text-[8px] italic">วันที่: <span id="dPrint"></span> | ผู้ตรวจ: เกศสุดา | เภสัชกร: ภญ.นิโลบล</p>
+            <p class="text-[9px]">ผู้ตรวจสอบ: เกศสุดา | เภสัชกร: ภญ.นิโลบล | วันที่: <span id="datePrint"></span></p>
         </div>
-        <div class="print-layout"><div class="print-col" id="colLeft"></div><div class="print-col" id="colRight"></div></div>
-        <div class="sig">
-            <div>ลงชื่อ.................................. (เกศสุดา) ผู้ตรวจ</div>
-            <div>ลงชื่อ.................................. (ภญ.นิโลบล) เภสัชกร</div>
+        <div class="print-container">
+            <div class="print-column" id="printCol1">
+                </div>
+            <div class="print-column" id="printCol2">
+                </div>
         </div>
-    </div>
-
-    <div id="mapModal" class="hidden fixed inset-0 bg-slate-900/95 flex items-center justify-center p-6 z-[60] backdrop-blur-sm">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-sm">
-            <h3 class="font-black text-slate-900 mb-2">🔍 พบรหัสบาร์โค้ดใหม่</h3>
-            <p class="text-[10px] text-indigo-600 font-mono mb-6" id="codeDisplay"></p>
-            <label class="block text-xs font-bold mb-2 uppercase italic text-slate-400">ระบุชื่อยาสำหรับรหัสนี้:</label>
-            <select id="drugSel" class="w-full border-2 border-slate-100 p-3 rounded-xl text-sm mb-6 outline-none focus:border-indigo-500"></select>
-            <div class="flex gap-3">
-                <button onclick="saveMapping()" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-black">บันทึก</button>
-                <button onclick="closeModal()" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-xl font-bold">ยกเลิก</button>
-            </div>
+        <div class="flex justify-around mt-4 text-[9px]">
+            <div class="text-center italic">ลงชื่อ......................................... (เกศสุดา)<br>ผู้ตรวจนับยา</div>
+            <div class="text-center italic">ลงชื่อ......................................... (ภญ.นิโลบล)<br>เภสัชกรควบคุม</div>
         </div>
     </div>
 
     <script>
+        // รายการยาครบ 43 รายการจาก PDF 
         const drugData = [
-            { id: 1, name: "5-FU 500 mg/10 ml", target: 700 }, { id: 2, name: "Actinomycin-D", target: 20, isExp: true },
-            { id: 3, name: "Asparaginase", target: 20, isExp: true }, { id: 4, name: "Bleomycin", target: 20 },
-            { id: 5, name: "Bortezomib", target: 20 }, { id: 6, name: "Carboplatin", target: 80 },
-            { id: 7, name: "Cisplatin", target: 80 }, { id: 8, name: "Cyclophosphamide", target: 50 },
-            { id: 9, name: "Cytarabine 100 mg", target: 30, isExp: true }, { id: 10, name: "Cytarabine 2 GM", target: 50, isExp: true },
-            { id: 11, name: "Dacarbazine 100 mg", target: 20 }, { id: 12, name: "Dacarbazine 500 mg", target: 10 },
-            { id: 13, name: "Docetaxel 20 mg", target: 40 }, { id: 14, name: "Docetaxel 80 mg", target: 30 },
-            { id: 15, name: "Doxorubicin", target: 60 }, { id: 16, name: "Etoposide", target: 50 },
-            { id: 17, name: "Gemcitabine 200 mg", target: 100 }, { id: 18, name: "Gemcitabine 1 GM", target: 60 },
-            { id: 19, name: "HERZUMA 440 mg", target: 25 }, { id: 20, name: "HERZUMA 150 mg", target: 10 },
-            { id: 21, name: "Idarubicin", target: 20, isExp: true }, { id: 22, name: "Ifosfamide", target: 70 },
-            { id: 23, name: "Irinotecan", target: 60 }, { id: 24, name: "Leucovorin", target: 120 },
-            { id: 25, name: "Mesna", target: 80 }, { id: 26, name: "Methotrexate 1 GM", target: 50 },
-            { id: 27, name: "Methotrexare 50 mg", target: 40 }, { id: 28, name: "Mitomycin 2 mg", target: 20 },
-            { id: 29, name: "Mitomycin 10 mg", target: 10, isExp: true }, { id: 30, name: "Mitoxantrone", target: 10, isExp: true },
-            { id: 31, name: "Oxaliplatin", target: 100 }, { id: 32, name: "Paclitaxel", target: 70 },
-            { id: 33, name: "TRUXIMA 100 mg", target: 60 }, { id: 34, name: "TRUXIMA 500 mg", target: 30 },
-            { id: 35, name: "Vinblastine", target: 20 }, { id: 36, name: "Vincristine 1 mg", target: 60 },
-            { id: 37, name: "Zoledronic acid", target: 20 }, { id: 38, name: "Bevacizumab (VERSAVO)", target: 40 },
-            { id: 39, name: "Ganciclovir", target: 1 }, { id: 40, name: "Cefuroxime", target: 10 }
+            { id: 1, name: "5-FU 1000 mg/20 ml", target: 250 }, { id: 2, name: "Actinomycin-D", target: 20 },
+            { id: 3, name: "Asparaginase", target: 20 }, { id: 4, name: "Azacitidine", target: 20 },
+            { id: 5, name: "Bleomycin", target: 20 }, { id: 6, name: "Bortezomib", target: 20 },
+            { id: 7, name: "Carboplatin", target: 60 }, { id: 8, name: "Cisplatin", target: 60 },
+            { id: 9, name: "Cyclophosphamide", target: 50 }, { id: 10, name: "Cytarabine 100 mg", target: 20 },
+            { id: 11, name: "Cytarabine 2 Gm", target: 40 }, { id: 12, name: "Dacarbazine 100 MG", target: 15 },
+            { id: 13, name: "Dacarbazine 500 MG", target: 10 }, { id: 14, name: "Docetaxel 20 MG", target: 40 },
+            { id: 15, name: "Docetaxel 80 MG", target: 30 }, { id: 16, name: "Doxorubicin", target: 60 },
+            { id: 17, name: "Etoposide", target: 50 }, { id: 18, name: "Gemcitabine 200 MG", target: 100 },
+            { id: 19, name: "Gemcitabine 1000 MG", target: 60 }, { id: 20, name: "HERZUMA 150 MG", target: 10 },
+            { id: 21, name: "HERZUMA 440 MG", target: 25 }, { id: 22, name: "Idarubicin", target: 20 },
+            { id: 23, name: "Ifosfamide", target: 70 }, { id: 24, name: "Irinotecan", target: 50 },
+            { id: 25, name: "Leucovorin", target: 120 }, { id: 26, name: "Mesna", target: 80 },
+            { id: 27, name: "Methotrexate 1 GM", target: 30 }, { id: 28, name: "Methotrexate 50 mg", target: 20 },
+            { id: 29, name: "Mitomycin C 2 MG", target: 20 }, { id: 30, name: "Mitomycin C 10 MG", target: 10 },
+            { id: 31, name: "Mitoxantrone", target: 10 }, { id: 32, name: "Oxaliplatin 100 mg", target: 100 },
+            { id: 33, name: "Paclitaxel (Taxol)", target: 50 }, { id: 34, name: "ACELLBIA 100 MG", target: 30 },
+            { id: 35, name: "ACELLBIA 500 MG", target: 20 }, { id: 36, name: "Vinblastine", target: 10 },
+            { id: 37, name: "Vincristine", target: 40 }, { id: 38, name: "Vinorelbine 10 MG", target: 10 },
+            { id: 39, name: "Zoledronic acid", target: 20 }, { id: 40, name: "TRUXIMA 100 MG", target: 20 },
+            { id: 41, name: "TRUXIMA 500 MG", target: 15 }, { id: 42, name: "Bevacizumab (AVASTIN)", target: 30 },
+            { id: 43, name: "Bevacizumab (VERSAVO)", target: 30 }
         ];
 
-        let drugs = JSON.parse(localStorage.getItem('oncoV19_data')) || drugData;
-        let html5QrCode;
-        let lastCode = "";
+        let drugs = JSON.parse(localStorage.getItem('oncoTargetsV15')) || drugData;
+        let scanner;
 
         function init() {
-            document.getElementById('dNow').innerText = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
-            document.getElementById('dPrint').innerText = new Date().toLocaleDateString('th-TH');
+            const dateStr = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+            document.getElementById('dateNow').innerText = dateStr;
+            document.getElementById('datePrint').innerText = new Date().toLocaleDateString('th-TH');
             renderUI();
-            updatePrint();
-            populateDrugSel();
+            updatePrintTable();
         }
 
         function renderUI() {
-            const container = document.getElementById('inventoryBody');
+            const container = document.getElementById('inventoryList');
             container.innerHTML = drugs.map(d => `
-                <tr id="row-${d.id}" class="border-b border-slate-50 transition-all duration-700">
-                    <td class="p-1 text-center text-[7px] text-slate-300 font-bold">${d.id}</td>
-                    <td class="p-1">
-                        <div class="font-bold text-slate-700 text-[10px] leading-tight">${d.name}</div>
-                        ${d.isExp ? `<div class="exp-red">!!! CHECK EXP</div><input type="date" id="e-${d.id}" oninput="syncExp(${d.id})" class="text-[8px] bg-slate-50 border rounded px-1 w-full h-5 outline-none" tabindex="-1">` : ''}
-                    </td>
-                    <td class="text-center"><input type="number" id="t-${d.id}" value="${d.target}" oninput="calc(${d.id})" class="w-8 text-center bg-orange-50 font-bold text-orange-600 rounded text-[10px] outline-none" tabindex="-1"></td>
-                    <td class="text-center px-1"><input type="number" id="s-${d.id}" inputmode="numeric" oninput="calc(${d.id})" onkeydown="handleNav(event, ${d.id})" class="w-12 text-center border-2 border-indigo-100 rounded font-black text-indigo-700 h-8 outline-none focus:border-indigo-600 shadow-sm"></td>
-                    <td class="text-center font-black text-xs italic" id="o-${d.id}">0</td>
+                <tr id="row-${d.id}" class="border-b border-slate-50">
+                    <td class="p-2 text-center text-[8px] text-slate-300 font-bold">${d.id}</td>
+                    <td class="p-2 font-bold text-slate-700 leading-tight text-[11px]">${d.name}</td>
+                    <td class="text-center"><input type="number" id="t-${d.id}" value="${d.target}" oninput="calc(${d.id})" class="w-10 text-center bg-orange-50 font-bold text-orange-600 rounded outline-none h-7 text-[11px]"></td>
+                    <td class="text-center px-1"><input type="number" id="s-${d.id}" inputmode="numeric" oninput="calc(${d.id})" onkeydown="handleNav(event, ${d.id})" class="w-12 text-center border-2 border-indigo-100 rounded font-black text-indigo-600 h-8 outline-none focus:border-indigo-500"></td>
+                    <td class="text-center font-black text-base"><span id="o-${d.id}" class="text-slate-200">0</span></td>
                 </tr>
             `).join('');
         }
 
-        function updatePrint() {
+        function updatePrintTable() {
             const mid = Math.ceil(drugs.length / 2);
-            const buildTbl = (data) => `
+            const col1 = drugs.slice(0, mid);
+            const col2 = drugs.slice(mid);
+            
+            const createTable = (data) => `
                 <table>
-                    <thead><tr><th>#</th><th>รายการยา</th><th>สต็อก</th><th>เบิก</th></tr></thead>
+                    <thead><tr><th>#</th><th>รายการยา</th><th>คงคลัง</th><th>เบิก</th></tr></thead>
                     <tbody>
-                        ${data.map(d => `<tr><td class="text-center">${d.id}</td><td>${d.name} ${d.isExp ? '<span style="font-size:7px; color:red" id="p-e-'+d.id+'"></span>' : ''}</td><td class="text-center" id="p-s-${d.id}">-</td><td class="order-bold" id="p-o-${d.id}">0</td></tr>`).join('')}
+                        ${data.map(d => `<tr><td class="text-center">${d.id}</td><td>${d.name}</td><td class="text-center" id="p-s-${d.id}">-</td><td class="order-bold" id="p-o-${d.id}">0</td></tr>`).join('')}
                     </tbody>
                 </table>`;
-            document.getElementById('colLeft').innerHTML = buildTbl(drugs.slice(0, mid));
-            document.getElementById('colRight').innerHTML = buildTbl(drugs.slice(mid));
+            
+            document.getElementById('printCol1').innerHTML = createTable(col1);
+            document.getElementById('printCol2').innerHTML = createTable(col2);
         }
 
         function calc(id) {
             const t = parseInt(document.getElementById(`t-${id}`).value) || 0;
             const s = parseInt(document.getElementById(`s-${id}`).value) || 0;
             const res = (t - s) > 0 ? (t - s) : 0;
+            
             document.getElementById(`o-${id}`).innerText = res;
-            document.getElementById(`o-${id}`).style.color = res > 0 ? "#ef4444" : "#e2e8f0";
+            document.getElementById(`o-${id}`).className = res > 0 ? "text-red-600" : "text-slate-200";
+            
+            // อัปเดตตารางพิมพ์
             document.getElementById(`p-s-${id}`).innerText = s || "-";
             document.getElementById(`p-o-${id}`).innerText = res || "0";
+            
             const idx = drugs.findIndex(d => d.id === id);
             drugs[idx].target = t;
-            localStorage.setItem('oncoV19_data', JSON.stringify(drugs));
+            localStorage.setItem('oncoTargetsV15', JSON.stringify(drugs));
         }
 
         function handleNav(e, id) {
-            if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); document.getElementById(`s-${id+1}`)?.focus(); }
-            if (e.key === 'ArrowUp') { e.preventDefault(); document.getElementById(`s-${id-1}`)?.focus(); }
+            if (e.key === 'Enter') { e.preventDefault(); document.getElementById(`s-${id+1}`)?.focus(); }
         }
 
         function toggleScanner() {
-            const wrap = document.getElementById('scan-area');
+            const wrap = document.getElementById('scanner-wrapper');
             if (wrap.classList.contains('hidden')) {
                 wrap.classList.remove('hidden');
-                document.getElementById('btnScan').innerText = "ปิดกล้อง";
-                html5QrCode = new Html5Qrcode("reader");
-                const config = { fps: 30, qrbox: { width: 250, height: 120 }, aspectRatio: 1.0 };
-                html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess);
+                scanner = new Html5Qrcode("reader");
+                scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 250, height: 120 } }, onScanSuccess);
             } else {
                 wrap.classList.add('hidden');
-                document.getElementById('btnScan').innerText = "📷 เปิดสแกน";
-                if(html5QrCode) html5QrCode.stop();
+                if(scanner) scanner.stop();
             }
         }
 
-        function onScanSuccess(code) {
-            // ตัดช่องว่างหน้า-หลัง และเลข 0 นำหน้า เพื่อความแม่นยำ
-            const cleanCode = code.trim().replace(/^0+/, '');
-            const drug = drugs.find(d => d.barcode === cleanCode);
-            
+        function onScanSuccess(decodedText) {
+            const drug = drugs.find(d => d.barcode === decodedText);
             if (drug) {
                 const el = document.getElementById(`s-${drug.id}`);
-                document.getElementById(`row-${drug.id}`).classList.add('scanned-row');
                 el.focus();
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                document.getElementById(`row-${drug.id}`).classList.add('scanned-row');
                 setTimeout(() => document.getElementById(`row-${drug.id}`).classList.remove('scanned-row'), 2000);
-            } else {
-                lastCode = cleanCode;
-                document.getElementById('codeDisplay').innerText = cleanCode;
-                document.getElementById('mapModal').classList.remove('hidden');
-                if(html5QrCode) html5QrCode.pause();
-            }
-        }
-
-        function populateDrugSel() {
-            const sel = document.getElementById('drugSel');
-            sel.innerHTML = `<option value="">-- เลือกชื่อยา --</option>` + drugs.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
-        }
-
-        function saveMapping() {
-            const id = document.getElementById('drugSel').value;
-            if(!id) return alert('กรุณาเลือกชื่อยา');
-            const idx = drugs.findIndex(d => d.id == id);
-            drugs[idx].barcode = lastCode;
-            localStorage.setItem('oncoV19_data', JSON.stringify(drugs));
-            closeModal();
-            renderUI();
-        }
-
-        function closeModal() {
-            document.getElementById('mapModal').classList.add('hidden');
-            if(html5QrCode) html5QrCode.resume();
-        }
-
-        function syncExp(id) {
-            const v = document.getElementById(`e-${id}`).value;
-            if (v) {
-                const [y, m, d] = v.split('-');
-                document.getElementById(`p-e-${id}`).innerText = ` (EXP: ${d}/${m}/${y.slice(-2)})`;
             }
         }
 
         function sendToLine() {
-            let msg = `📦 ยอดเบิกยา (${document.getElementById('dNow').innerText})\n👤 เกศสุดา\n------------------\n`;
+            let msg = `📦 ยอดเบิกยา (${document.getElementById('dateNow').innerText})\n👤 ผู้ตรวจ: เกศสุดา\n------------------\n`;
             let items = drugs.map(d => {
                 const s = parseInt(document.getElementById(`s-${d.id}`).value) || 0;
                 const o = (d.target - s) > 0 ? (d.target - s) : 0;
